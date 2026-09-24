@@ -1,0 +1,2236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBSA ACADEMY · Copilot AI</title>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+<style>
+  :root{
+    --brand-1:#6366f1; --brand-2:#a855f7; --brand-3:#ec4899; --brand-4:#f59e0b;
+    --brand-5:#10b981; --brand-6:#06b6d4; --brand-7:#ef4444; --brand-8:#3b82f6;
+    --ink:#0b1220; --ink-2:#1e293b; --muted:#64748b; --line:#e2e8f0;
+    --shadow-sm:0 1px 2px rgba(15,23,42,.05);
+    --shadow-md:0 10px 30px -12px rgba(15,23,42,.18);
+    --shadow-lg:0 30px 60px -25px rgba(15,23,42,.35);
+    --shadow-glow:0 0 0 4px rgba(99,102,241,.18);
+    --grad-brand:linear-gradient(135deg,#6366f1 0%,#a855f7 45%,#ec4899 100%);
+    --grad-warm:linear-gradient(135deg,#f59e0b 0%,#ec4899 100%);
+    --grad-cool:linear-gradient(135deg,#06b6d4 0%,#6366f1 100%);
+    --grad-green:linear-gradient(135deg,#10b981 0%,#06b6d4 100%);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter','Segoe UI',Roboto,system-ui,sans-serif}
+  html{scroll-behavior:smooth}
+  html,body{height:auto;min-height:100%}
+
+  body{
+    padding:24px 16px;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(1200px 700px at 10% -10%, rgba(99,102,241,.28), transparent 60%),
+      radial-gradient(1000px 700px at 90% 0%, rgba(236,72,153,.22), transparent 55%),
+      radial-gradient(900px 700px at 50% 110%, rgba(16,185,129,.20), transparent 60%),
+      linear-gradient(180deg,#eef2ff 0%,#f5f7fc 40%,#fdf2f8 100%);
+    background-attachment:fixed;
+    overflow-x:hidden;
+  }
+
+  /* ---------- SHELL ---------- */
+  .app{
+    max-width:1560px;margin:0 auto;
+    background:rgba(255,255,255,.78);
+    backdrop-filter:blur(18px) saturate(150%);
+    -webkit-backdrop-filter:blur(18px) saturate(150%);
+    border-radius:28px;
+    box-shadow:0 30px 70px -30px rgba(15,23,42,.35),0 1px 0 rgba(255,255,255,.9) inset;
+    padding:26px;
+    border:1px solid rgba(255,255,255,.75);
+    position:relative;
+  }
+  .app::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:6px;
+    background:var(--grad-brand);border-radius:28px 28px 0 0;
+  }
+  @media(max-width:800px){ .app{padding:16px;border-radius:20px} body{padding:10px} }
+
+  /* ---------- TOP BAR (sticky) ---------- */
+  .top-bar{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;
+    gap:14px;margin-bottom:22px;padding:14px 0 18px;
+    border-bottom:1px solid rgba(226,232,240,.8);
+    position:sticky;top:0;z-index:50;
+    background:rgba(255,255,255,.85);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-radius:14px;
+    padding-left:12px;padding-right:12px;
+  }
+  .logo h1{
+    font-size:1.8rem;font-weight:800;letter-spacing:-.6px;
+    background:linear-gradient(135deg,#4f46e5,#a855f7,#ec4899 70%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    display:flex;align-items:center;gap:10px;
+  }
+  .logo small{
+    display:block;font-size:.75rem;color:var(--muted);font-weight:500;
+    margin-top:4px;letter-spacing:.4px;
+  }
+  .badges{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .mode-badge{
+    background:linear-gradient(135deg,#eef2ff,#f5f3ff);
+    padding:9px 16px;border-radius:100px;font-weight:700;font-size:.78rem;
+    color:var(--brand-2);border:1px solid #ddd6fe;
+    display:inline-flex;align-items:center;gap:6px;
+    box-shadow:0 6px 16px -8px rgba(168,85,247,.5);
+  }
+  .user-badge{
+    display:flex;align-items:center;gap:10px;
+    background:linear-gradient(135deg,#ffffff,#f8fafc);
+    padding:5px 5px 5px 14px;border-radius:100px;
+    border:1px solid var(--line);box-shadow:0 6px 20px -10px rgba(15,23,42,.25);
+  }
+  .user-badge .name{font-weight:700;font-size:.85rem;color:var(--ink-2)}
+  .avatar-mini{
+    width:36px;height:36px;border-radius:50%;
+    background:var(--grad-brand);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+    font-size:1.1rem;color:#fff;flex-shrink:0;
+    box-shadow:0 4px 12px -4px rgba(99,102,241,.6);
+  }
+  .avatar-mini img{width:100%;height:100%;object-fit:cover}
+
+  /* ---------- GRID (with proper min-widths to prevent squeeze) ---------- */
+  .main-grid{
+    display:grid;
+    grid-template-columns:minmax(300px,340px) minmax(0,1fr) minmax(280px,320px);
+    gap:20px;
+    align-items:start;
+  }
+  @media(max-width:1250px){
+    .main-grid{grid-template-columns:1fr}
+  }
+  .col{min-width:0}
+
+  /* ---------- CARDS ---------- */
+  .card{
+    background:linear-gradient(180deg,rgba(255,255,255,.99) 0%,rgba(248,250,255,.96) 100%);
+    border-radius:22px;
+    padding:20px 22px;
+    border:1px solid rgba(226,232,240,.9);
+    box-shadow:0 14px 30px -20px rgba(15,23,42,.22);
+    margin-bottom:20px;
+    position:relative;
+    overflow:hidden;
+    transition:box-shadow .2s,transform .2s;
+  }
+  .card:hover{box-shadow:0 22px 45px -25px rgba(15,23,42,.3)}
+  .card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:4px;
+    background:var(--grad-brand);
+  }
+  .card.hue-pink::before{background:var(--grad-warm)}
+  .card.hue-green::before{background:var(--grad-green)}
+  .card.hue-cyan::before{background:var(--grad-cool)}
+  .card.hue-amber::before{background:linear-gradient(90deg,#f59e0b,#ef4444)}
+
+  .card h2{
+    font-size:1.1rem;font-weight:800;color:var(--ink-2);
+    margin-bottom:14px;display:flex;align-items:center;gap:8px;
+    letter-spacing:-.2px;
+  }
+  .card h2 .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--grad-brand);
+    box-shadow:0 0 10px rgba(168,85,247,.7);
+    animation:pulseDot 2s ease-in-out infinite;
+    flex-shrink:0;
+  }
+  @keyframes pulseDot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.35);opacity:.7}}
+
+  .card h3{font-size:.98rem;color:var(--ink-2);margin-bottom:10px;font-weight:700}
+
+  /* ---------- FORM FIELDS ---------- */
+  label{font-size:.76rem;font-weight:700;color:var(--ink-2);display:block;margin-bottom:5px;letter-spacing:.2px}
+  input,textarea,select{
+    width:100%;padding:11px 16px;border-radius:12px;
+    border:1.5px solid rgba(203,213,225,.9);
+    background:#fbfdff;
+    font-size:.9rem;outline:none;transition:.2s;
+    color:var(--ink);font-family:inherit;
+  }
+  input:focus,textarea:focus,select:focus{
+    border-color:var(--brand-1);background:#fff;
+    box-shadow:0 0 0 4px rgba(99,102,241,.15);
+  }
+  textarea{resize:vertical;min-height:70px}
+  .form-group{margin-bottom:12px}
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    border:none;padding:11px 20px;border-radius:100px;
+    font-weight:700;font-size:.83rem;cursor:pointer;
+    transition:transform .15s,box-shadow .2s;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    background:linear-gradient(180deg,#ffffff,#f1f5f9);
+    color:var(--ink-2);
+    border:1.5px solid rgba(226,232,240,.9);
+    font-family:inherit;letter-spacing:.2px;
+    white-space:nowrap;
+  }
+  .btn:hover{transform:translateY(-1px);box-shadow:0 10px 20px -12px rgba(15,23,42,.35)}
+  .btn:active{transform:translateY(0)}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+  .btn-primary{background:var(--grad-brand);color:#fff;border-color:transparent;box-shadow:0 8px 20px -10px rgba(99,102,241,.75)}
+  .btn-primary:hover{box-shadow:0 12px 26px -12px rgba(99,102,241,.85)}
+  .btn-success{background:var(--grad-green);color:#fff;border-color:transparent;box-shadow:0 8px 20px -10px rgba(16,185,129,.75)}
+  .btn-secondary{background:linear-gradient(180deg,#f8fafc,#e2e8f0);color:var(--ink-2)}
+  .btn-danger{background:linear-gradient(135deg,#fee2e2,#fecaca);color:var(--brand-7);border-color:#fecaca}
+  .btn-small{padding:7px 14px;font-size:.73rem}
+  .btn-block{width:100%}
+
+  /* ---------- MESSAGES ---------- */
+  .message{
+    font-size:.76rem;padding:10px 14px;border-radius:12px;
+    margin-top:8px;font-weight:600;min-height:1rem;
+    border:1px solid transparent;line-height:1.5;
+  }
+  .message.error{background:linear-gradient(135deg,#fee2e2,#fecaca);color:#991b1b;border-color:#fca5a5}
+  .message.success{background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:#065f46;border-color:#6ee7b7}
+  .message.info{background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:#1e40af;border-color:#93c5fd}
+
+  .password-hint{
+    background:linear-gradient(135deg,#eef2ff,#f5f3ff);
+    border-radius:12px;padding:12px 14px;margin-top:6px;
+    font-size:.7rem;color:var(--ink-2);
+    border-left:4px solid var(--brand-2);line-height:1.6;font-weight:500;
+  }
+
+  .guest-banner{
+    background:linear-gradient(135deg,#fef3c7,#fde68a);
+    border-radius:14px;padding:12px 14px;font-size:.78rem;
+    color:#78350f;border:1px solid #fcd34d;margin-bottom:14px;
+    display:flex;gap:8px;align-items:center;font-weight:600;
+  }
+
+  /* ---------- STEPS ---------- */
+  .steps{display:flex;gap:6px;margin-bottom:14px}
+  .step{
+    flex:1;text-align:center;font-size:.66rem;font-weight:800;
+    padding:7px 6px;border-radius:100px;
+    background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0;transition:.3s;
+  }
+  .step.active{background:var(--grad-brand);color:#fff;border-color:transparent;box-shadow:0 6px 14px -6px rgba(99,102,241,.7)}
+  .step.done{background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:#065f46;border-color:#a7f3d0}
+
+  /* ---------- PLAN ---------- */
+  .plan-box{
+    background:
+      radial-gradient(circle at 80% 20%, rgba(236,72,153,.35), transparent 50%),
+      radial-gradient(circle at 20% 80%, rgba(168,85,247,.45), transparent 55%),
+      linear-gradient(135deg,#1e1b4b 0%,#4c1d95 50%,#7c3aed 100%);
+    color:#fff;border-radius:20px;padding:20px;
+    margin-bottom:16px;position:relative;overflow:hidden;
+    box-shadow:0 18px 36px -16px rgba(76,29,149,.8);
+  }
+  .plan-box::before{
+    content:'';position:absolute;top:-40%;right:-30%;width:200px;height:200px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,.22),transparent 70%);
+  }
+  .plan-box strong{font-size:.95rem;letter-spacing:.3px;position:relative}
+  .plan-box .price{
+    font-size:2rem;font-weight:800;margin:8px 0;position:relative;letter-spacing:-.8px;
+    background:linear-gradient(135deg,#fff,#fbbf24);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .plan-box .price span{font-size:.85rem;font-weight:400;opacity:.75;-webkit-text-fill-color:#cbd5e1}
+  .plan-box ul{list-style:none;font-size:.78rem;line-height:1.9;margin-top:6px;opacity:.95;position:relative}
+
+  /* ---------- PAYMENT ---------- */
+  .pay-methods{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+  .pay-method{
+    border:1.5px solid var(--line);border-radius:12px;
+    padding:12px 8px;text-align:center;cursor:pointer;
+    font-size:.72rem;font-weight:700;color:var(--ink-2);
+    background:#fff;transition:.2s;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+  }
+  .pay-method:hover{border-color:var(--brand-1);background:#f5f3ff;transform:translateY(-2px)}
+  .pay-method.selected{border-color:var(--brand-1);background:linear-gradient(135deg,#eef2ff,#f5f3ff);color:var(--brand-1);box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+  .pay-method .icon{font-size:1.4rem}
+
+  .pay-detail{background:#f8fafc;border-radius:14px;padding:14px;border:1.5px dashed #c7d2fe;margin-bottom:14px}
+  .pay-detail h4{font-size:.82rem;color:var(--ink-2);margin-bottom:8px;font-weight:700}
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+  .summary-row{display:flex;justify-content:space-between;font-size:.8rem;padding:7px 0;border-bottom:1px dashed var(--line);color:var(--ink-2)}
+  .summary-row.total{font-weight:800;font-size:1rem;color:var(--ink);border-bottom:none;padding-top:10px}
+
+  .spinner{
+    width:18px;height:18px;border:3px solid rgba(99,102,241,.2);
+    border-top-color:var(--brand-1);border-radius:50%;
+    animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .pay-success{
+    background:linear-gradient(135deg,#d1fae5,#a7f3d0);
+    border:1px solid #6ee7b7;border-radius:18px;
+    padding:20px;text-align:center;color:#065f46;font-size:.88rem;font-weight:700;
+  }
+  .pay-success .big{font-size:2.2rem;display:block;margin-bottom:6px;animation:pop .5s ease}
+  @keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+
+  /* ---------- PROFILE ---------- */
+  .photo-preview{display:flex;align-items:center;gap:14px;margin:10px 0}
+  .avatar-lg{
+    width:76px;height:76px;border-radius:50%;
+    background:var(--grad-brand);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+    font-size:2rem;flex-shrink:0;color:#fff;
+    box-shadow:0 10px 24px -10px rgba(99,102,241,.7),0 0 0 4px rgba(255,255,255,.9);
+  }
+  .avatar-lg img{width:100%;height:100%;object-fit:cover}
+  .file-label{
+    background:linear-gradient(135deg,#eef2ff,#f5f3ff);
+    padding:9px 16px;border-radius:100px;font-size:.75rem;
+    font-weight:700;cursor:pointer;
+    border:1.5px dashed var(--brand-2);color:var(--brand-2);
+  }
+  input[type=file]{display:none}
+
+  /* ---------- SETTINGS ---------- */
+  .settings-tabs{display:flex;gap:6px;margin-bottom:12px}
+  .settings-tab{
+    flex:1;padding:9px 8px;border-radius:12px;
+    border:1.5px solid var(--line);background:#fff;
+    font-size:.73rem;font-weight:700;cursor:pointer;
+    color:var(--ink-2);text-align:center;transition:.2s;
+  }
+  .settings-tab.active{background:var(--grad-brand);color:#fff;border-color:transparent}
+  .settings-panel{display:none}
+  .settings-panel.active{display:block}
+
+  /* ---------- CATALOG ---------- */
+  .lang-card{
+    background:#fff;
+    border:1.5px solid #eef2f9;
+    border-radius:18px;padding:16px 18px;margin-bottom:12px;
+    display:grid;grid-template-columns:56px 1fr auto;gap:14px;
+    align-items:center;transition:.25s;position:relative;overflow:hidden;
+  }
+  .lang-card::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+    background:var(--grad-brand);opacity:0;transition:.25s;
+  }
+  .lang-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px -18px rgba(15,23,42,.3);border-color:#e0e7ff}
+  .lang-card:hover::before{opacity:1}
+  .lang-card.locked{opacity:.75;background:#fafbfc}
+  .lang-card.locked::before{background:linear-gradient(180deg,#94a3b8,#64748b);opacity:1}
+  .lang-card.completed{border-color:#a7f3d0;background:linear-gradient(180deg,#f0fdf4,#ecfdf5)}
+  .lang-card.completed::before{background:var(--grad-green);opacity:1}
+
+  .lang-icon{
+    width:56px;height:56px;border-radius:16px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.25rem;font-weight:800;color:#fff;
+    background:var(--grad-brand);
+    flex-shrink:0;letter-spacing:-.5px;
+    box-shadow:0 8px 20px -8px rgba(99,102,241,.7);
+  }
+  .lang-card.completed .lang-icon{background:var(--grad-green)}
+  .lang-card.locked .lang-icon{background:linear-gradient(135deg,#94a3b8,#64748b)}
+
+  .lang-info strong{display:block;font-size:.95rem;color:var(--ink);font-weight:800;margin-bottom:3px}
+  .lang-info small{font-size:.73rem;color:var(--muted);display:block;line-height:1.5}
+  .lang-meta{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+  .lang-tag{font-size:.62rem;font-weight:800;padding:3px 9px;border-radius:100px;border:1px solid}
+  .lang-tag.pdf{background:#fff1f2;color:#be123c;border-color:#fecdd3}
+  .lang-tag.video{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+  .lang-tag.quiz{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}
+
+  .lang-action{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+  .lang-status{font-size:.66rem;font-weight:800;padding:5px 12px;border-radius:100px;white-space:nowrap}
+  .lang-status.available{background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:#1e40af;border:1px solid #93c5fd}
+  .lang-status.locked{background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0}
+  .lang-status.completed{background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:#065f46;border:1px solid #6ee7b7}
+
+  .progress-bar{width:100%;height:10px;background:#f1f5f9;border-radius:100px;overflow:hidden;margin-top:8px}
+  .progress-bar .fill{
+    height:100%;background:linear-gradient(90deg,#6366f1,#a855f7,#ec4899,#f59e0b);
+    border-radius:100px;transition:width .6s ease;
+    background-size:200% 100%;animation:progressFlow 4s linear infinite;
+  }
+  @keyframes progressFlow{0%{background-position:0 0}100%{background-position:200% 0}}
+
+  /* ---------- VIEWER ---------- */
+  .viewer{background:linear-gradient(135deg,#f5f3ff,#eef2ff);border-radius:18px;padding:18px;margin-top:14px;border:1px solid #ddd6fe}
+  .viewer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+  .viewer-head h3{font-size:.98rem;color:var(--ink-2);font-weight:800}
+  .tutorial-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+  .tutorial-row{
+    background:#fff;border-radius:12px;padding:12px 14px;
+    display:flex;justify-content:space-between;align-items:center;
+    border-left:4px solid var(--brand-1);
+    font-size:.82rem;gap:8px;flex-wrap:wrap;
+    transition:.2s;cursor:pointer;
+  }
+  .tutorial-row:hover{transform:translateX(3px);box-shadow:0 8px 18px -12px rgba(15,23,42,.3)}
+  .tutorial-row.viewed{background:linear-gradient(180deg,#f0fdf4,#ecfdf5);border-left-color:var(--brand-5)}
+  .tutorial-row.pdf{border-left-color:var(--brand-7)}
+  .tutorial-row.video{border-left-color:var(--brand-8)}
+  .tutorial-row .name{font-weight:700;color:var(--ink-2)}
+  .tutorial-row .type{font-size:.62rem;font-weight:800;padding:3px 8px;border-radius:100px;margin-right:6px}
+  .tutorial-row .type.pdf{background:#fff1f2;color:#be123c}
+  .tutorial-row .type.video{background:#eff6ff;color:#1d4ed8}
+  .tutorial-row .open-icon{font-size:.7rem;color:var(--muted);font-weight:700}
+  .tutorial-row.viewed .open-icon{color:var(--brand-5)}
+
+  /* ---------- QUIZ ---------- */
+  .quiz-wrap{
+    background:linear-gradient(135deg,#fef3c7,#fde68a,#fbcfe8);
+    border-radius:20px;padding:20px;
+    border:2px solid #fbbf24;margin-top:14px;
+  }
+  .quiz-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+  .quiz-head h3{font-size:.98rem;color:var(--ink);font-weight:800}
+  .quiz-progress{font-size:.75rem;font-weight:800;color:var(--brand-2);background:#fff;padding:6px 14px;border-radius:100px;border:1px solid #ddd6fe}
+  .quiz-q{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;border:1px solid #e0e7ff}
+  .quiz-q .q-num{font-size:.66rem;font-weight:800;color:var(--brand-2);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase}
+  .quiz-q .q-text{font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:10px;line-height:1.5}
+  .quiz-opt{display:flex;align-items:center;gap:8px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 14px;margin-bottom:6px;cursor:pointer;font-size:.83rem;color:var(--ink-2);transition:.15s}
+  .quiz-opt:hover{border-color:var(--brand-1);background:#f5f3ff}
+  .quiz-opt.selected{border-color:var(--brand-1);background:linear-gradient(135deg,#eef2ff,#f5f3ff);font-weight:700;color:var(--brand-1)}
+  .quiz-opt input{margin:0;width:auto}
+  .quiz-score{text-align:center;padding:22px 16px;border-radius:18px;font-weight:800;font-size:1rem;margin-bottom:14px}
+  .quiz-score.pass{background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:#065f46;border:2px solid #6ee7b7}
+  .quiz-score.fail{background:linear-gradient(135deg,#fee2e2,#fecaca);color:#991b1b;border:2px solid #f87171}
+  .quiz-score .pct{font-size:2.2rem;display:block;margin-bottom:4px}
+  .quiz-result-detail{font-size:.82rem;color:var(--ink-2);text-align:center;margin-bottom:14px;line-height:1.6;background:#fff;padding:12px;border-radius:12px;border:1px dashed #cbd5e1}
+
+  /* ---------- COMPOSER ---------- */
+  .composer-tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+  .composer-tab{padding:8px 16px;border-radius:100px;border:1.5px solid var(--line);background:#fff;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--ink-2);transition:.2s}
+  .composer-tab:hover{border-color:var(--brand-1);background:#f5f3ff}
+  .composer-tab.active{background:var(--grad-brand);color:#fff;border-color:transparent}
+  .composer-preview{margin-top:8px;border-radius:12px;overflow:hidden;max-height:160px;display:flex;justify-content:center;background:#f8fafc;border:1px solid #e0e7ff}
+  .composer-preview img,.composer-preview video{max-width:100%;max-height:160px;object-fit:contain}
+
+  /* ---------- FEED ---------- */
+  .feed-post{background:#fff;border-radius:18px;padding:18px 20px;border:1px solid #eef2f9;margin-bottom:14px;box-shadow:0 4px 14px -10px rgba(15,23,42,.2);transition:.2s}
+  .feed-post:hover{box-shadow:0 14px 30px -22px rgba(15,23,42,.3)}
+  .post-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;justify-content:space-between}
+  .post-header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+  .post-header .avatar-mini{width:42px;height:42px;font-size:1.3rem}
+  .post-header .meta{min-width:0}
+  .post-header .meta strong{display:block;font-size:.88rem;color:var(--ink);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .post-header .meta small{font-size:.68rem;color:var(--muted)}
+  .post-owner-actions{display:flex;gap:6px}
+  .icon-btn{background:#f8fafc;border:1.5px solid var(--line);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:.2s}
+  .icon-btn:hover{transform:translateY(-1px);box-shadow:0 6px 14px -8px rgba(15,23,42,.4)}
+  .icon-btn.edit:hover{background:#dbeafe;border-color:#93c5fd;color:var(--brand-8)}
+  .icon-btn.delete:hover{background:#fee2e2;border-color:#fca5a5;color:var(--brand-7)}
+  .post-content{font-size:.9rem;color:var(--ink-2);line-height:1.6;margin-bottom:10px;white-space:pre-wrap;word-break:break-word}
+  .post-media{margin:10px 0;border-radius:14px;overflow:hidden;max-height:380px;background:#f8fafc;display:flex;justify-content:center}
+  .post-media img,.post-media video{max-width:100%;max-height:380px;object-fit:contain}
+  .post-actions{display:flex;gap:8px;align-items:center;border-top:1px solid #f1f5f9;padding-top:10px;margin-top:6px}
+  .like-btn{background:#f8fafc;border:1.5px solid var(--line);font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:6px;color:var(--muted);font-weight:700;padding:7px 14px;border-radius:100px;transition:.2s}
+  .like-btn:hover{background:#fff1f2;border-color:#fecdd3;color:var(--brand-7)}
+  .like-btn.liked{background:#fff1f2;border-color:#fecdd3;color:var(--brand-7)}
+
+  .comment-section{margin-top:10px;border-top:1px solid #f1f5f9;padding-top:10px}
+  .comment-list{max-height:150px;overflow-y:auto;margin-bottom:8px;display:flex;flex-direction:column;gap:6px;padding-right:4px}
+  .comment-item{background:#f8fafc;padding:8px 12px;border-radius:10px;font-size:.78rem;border-left:3px solid var(--brand-1);color:var(--ink-2);display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+  .comment-item strong{color:var(--brand-2);margin-right:6px;font-weight:800}
+  .comment-item .comment-owner-actions{display:flex;gap:4px;opacity:0;transition:.2s}
+  .comment-item:hover .comment-owner-actions{opacity:1}
+  .comment-item .comment-icon-btn{background:transparent;border:none;cursor:pointer;padding:2px 6px;border-radius:6px;font-size:.7rem;color:var(--muted)}
+  .comment-item .comment-icon-btn.delete:hover{background:#fee2e2;color:var(--brand-7)}
+  .comment-input-row{display:flex;gap:6px}
+  .comment-input-row input{flex:1;padding:9px 14px;font-size:.8rem;border-radius:100px}
+  .comment-input-row button{padding:9px 18px;font-size:.75rem;border-radius:100px;background:var(--grad-brand);color:#fff;border:none;cursor:pointer;font-weight:800;font-family:inherit}
+
+  /* ---------- INBOX ---------- */
+  .inbox-item{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;border-left:4px solid var(--brand-1);font-size:.78rem;box-shadow:0 2px 8px -4px rgba(15,23,42,.2)}
+  .inbox-item.payment{border-left-color:var(--brand-5);background:linear-gradient(180deg,#f0fdf4,#fff)}
+  .inbox-item.quiz{border-left-color:var(--brand-4);background:linear-gradient(180deg,#fffbeb,#fff)}
+  .inbox-item.txn{border-left-color:var(--brand-6);background:linear-gradient(180deg,#ecfeff,#fff)}
+  .inbox-item .from{font-weight:800;color:var(--ink);font-size:.82rem}
+  .inbox-item .time{font-size:.63rem;color:var(--muted);margin-left:6px}
+  .inbox-item .text{margin-top:4px;color:var(--ink-2);word-break:break-word;line-height:1.5}
+
+  /* ---------- SCROLL ---------- */
+  .scroll-area{
+    max-height:520px;overflow-y:auto;padding-right:6px;
+    scrollbar-width:thin;
+    scrollbar-color:#a855f7 #f1f5f9;
+  }
+  .scroll-area::-webkit-scrollbar{width:8px}
+  .scroll-area::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#a855f7,#ec4899);border-radius:10px}
+  .scroll-area::-webkit-scrollbar-track{background:#f1f5f9;border-radius:10px}
+
+  .hidden{display:none!important}
+  .empty-msg{font-size:.82rem;color:var(--muted);text-align:center;padding:22px 16px;font-style:italic;background:#f8fafc;border-radius:12px;border:1px dashed #cbd5e1}
+  .footer-note{text-align:center;font-size:.73rem;color:var(--muted);margin-top:24px;padding-top:16px;border-top:1px solid var(--line);font-weight:500}
+
+  .info-list{list-style:none;font-size:.78rem;color:var(--ink-2);line-height:1.9;font-weight:500}
+  .info-list li{display:flex;align-items:center;gap:8px}
+  .info-list li::before{content:'✓';color:var(--brand-5);font-weight:800;background:#d1fae5;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0}
+
+  .telebirr-badge{background:#d1fae5;color:#065f46;border-radius:100px;padding:2px 10px;font-size:.63rem;font-weight:800;border:1px solid #6ee7b7;margin-left:4px}
+
+  /* ---------- MODAL ---------- */
+  .media-modal{position:fixed;inset:0;background:rgba(11,18,32,.88);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+  .media-modal-content{background:#fff;border-radius:22px;max-width:1000px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 40px 80px -20px rgba(0,0,0,.6)}
+  .media-modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid #eef2f9;gap:10px;background:linear-gradient(135deg,#f5f3ff,#eef2ff);flex-wrap:wrap}
+  .media-modal-head h3{font-size:.98rem;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+  .media-modal-head h3 span{font-size:.72rem;font-weight:600;color:var(--muted);margin-left:6px}
+  .media-modal-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .media-modal-body{flex:1;overflow:auto;background:#f1f5f9;display:flex;justify-content:center;align-items:center;padding:14px;min-height:400px}
+  .media-modal-body iframe{width:100%;height:70vh;border:none;border-radius:10px;background:#fff}
+  .media-modal-body video{width:100%;max-height:70vh;border-radius:10px;background:#000}
+
+  /* ---------- TOAST ---------- */
+  .toast-container{position:fixed;top:20px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:10px;max-width:340px}
+  .toast{background:linear-gradient(135deg,#1e1b4b,#4338ca);color:#fff;padding:12px 18px;border-radius:14px;font-size:.82rem;font-weight:600;box-shadow:0 20px 40px -14px rgba(67,56,202,.8);display:flex;align-items:center;gap:8px;animation:slideIn .3s ease}
+  .toast.success{background:linear-gradient(135deg,#059669,#10b981)}
+  .toast.error{background:linear-gradient(135deg,#dc2626,#ef4444)}
+  .toast.warning{background:linear-gradient(135deg,#d97706,#f59e0b)}
+  @keyframes slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+
+  /* ============ COPILOT AI ============ */
+  .copilot-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #eef2f9}
+  .copilot-avatar{
+    width:44px;height:44px;border-radius:14px;
+    background:linear-gradient(135deg,#6366f1,#a855f7,#ec4899);
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.4rem;flex-shrink:0;
+    box-shadow:0 10px 22px -8px rgba(168,85,247,.7);
+    position:relative;
+  }
+  .copilot-avatar::after{
+    content:'';position:absolute;bottom:-2px;right:-2px;
+    width:12px;height:12px;border-radius:50%;
+    background:#10b981;border:2px solid #fff;
+    box-shadow:0 0 8px rgba(16,185,129,.8);
+    animation:pulseDot 2s ease-in-out infinite;
+  }
+  .copilot-header-info strong{display:block;font-size:.92rem;color:var(--ink);font-weight:800}
+  .copilot-header-info small{display:block;font-size:.68rem;color:var(--muted);margin-top:2px}
+  .copilot-header-info small .live-dot{
+    display:inline-block;width:6px;height:6px;border-radius:50%;
+    background:#10b981;margin-right:5px;
+    animation:pulseDot 1.5s ease-in-out infinite;
+  }
+
+  .ask-cats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .ask-cat{
+    background:linear-gradient(135deg,#eef2ff,#f5f3ff);
+    border:1px solid #ddd6fe;color:var(--brand-2);
+    padding:6px 12px;border-radius:100px;
+    font-size:.68rem;font-weight:700;cursor:pointer;
+    transition:.2s;font-family:inherit;
+  }
+  .ask-cat:hover{transform:translateY(-1px);box-shadow:0 6px 14px -8px rgba(168,85,247,.6)}
+
+  .ai-chat{
+    max-height:380px;overflow-y:auto;padding:12px;
+    background:linear-gradient(180deg,#fbfdff,#f5f3ff);
+    border-radius:16px;
+    display:flex;flex-direction:column;gap:10px;
+    margin-bottom:10px;
+    border:1px solid #e5e7eb;
+    scroll-behavior:smooth;
+  }
+  .ai-chat::-webkit-scrollbar{width:6px}
+  .ai-chat::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#a855f7,#ec4899);border-radius:10px}
+
+  .ai-msg{padding:10px 14px;border-radius:14px;font-size:.8rem;line-height:1.6;max-width:94%;word-break:break-word;animation:msgIn .25s ease}
+  @keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .ai-msg.user{background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;box-shadow:0 8px 18px -10px rgba(99,102,241,.7)}
+  .ai-msg.bot{background:#fff;color:var(--ink-2);align-self:flex-start;border-bottom-left-radius:4px;border:1px solid #eef2f9;box-shadow:0 4px 12px -8px rgba(15,23,42,.25)}
+  .ai-msg.bot strong{color:var(--brand-2)}
+  .ai-msg .msg-meta{display:block;font-size:.6rem;color:var(--muted);margin-top:5px;opacity:.85}
+  .ai-msg.user .msg-meta{color:rgba(255,255,255,.75);text-align:right}
+  .ai-msg code{background:rgba(15,23,42,.08);padding:2px 6px;border-radius:5px;font-family:'Consolas','Monaco',monospace;font-size:.75rem;color:#6d28d9}
+  .ai-msg.user code{background:rgba(255,255,255,.2);color:#fff}
+  .ai-msg pre{background:#0f172a;color:#a7f3d0;padding:10px 12px;border-radius:10px;margin:8px 0;overflow-x:auto;font-size:.72rem;font-family:'Consolas','Monaco',monospace;line-height:1.5;white-space:pre-wrap}
+  .ai-msg.user pre{background:rgba(0,0,0,.28)}
+
+  .ai-input-row{display:flex;gap:8px;align-items:center}
+  .ai-input-row input{flex:1;padding:11px 16px;font-size:.83rem;border-radius:100px}
+  .ai-send{padding:11px 20px;border-radius:100px;background:var(--grad-brand);color:#fff;border:none;cursor:pointer;font-weight:800;font-family:inherit;font-size:.8rem;transition:.2s;box-shadow:0 8px 18px -10px rgba(99,102,241,.7)}
+  .ai-send:hover{transform:translateY(-1px)}
+  .ai-send:disabled{opacity:.5;cursor:not-allowed}
+
+  .ai-suggestions{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+  .ai-suggest{background:#fff;border:1.5px solid var(--line);border-radius:100px;padding:6px 12px;font-size:.7rem;font-weight:700;color:var(--ink-2);cursor:pointer;transition:.2s;font-family:inherit}
+  .ai-suggest:hover{background:#eef2ff;border-color:var(--brand-1);color:var(--brand-1)}
+
+  /* ---------- COMPILER ---------- */
+  .code-editor{
+    width:100%;min-height:150px;
+    font-family:'Consolas','Monaco',monospace;font-size:.8rem;
+    padding:14px;border-radius:14px;border:1.5px solid #1e293b;
+    background:#0f172a;color:#a7f3d0;outline:none;resize:vertical;line-height:1.55;
+  }
+  .code-editor:focus{border-color:var(--brand-1);box-shadow:0 0 0 4px rgba(99,102,241,.25)}
+  .code-output{
+    margin-top:10px;padding:12px;
+    background:#0f172a;color:#a7f3d0;border-radius:12px;
+    font-family:'Consolas','Monaco',monospace;font-size:.75rem;
+    min-height:60px;max-height:220px;overflow:auto;
+    white-space:pre-wrap;border:1px solid #1e293b;
+  }
+  .code-output.error{color:#fca5a5}
+  .code-toolbar{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <div class="logo">
+      <h1>📘 OBSA ACADEMY</h1>
+      <small>learn · build · get certified · powered by Copilot AI</small>
+    </div>
+    <div class="badges">
+      <div class="mode-badge">👥 <span id="modeText">Guest</span></div>
+      <div class="user-badge">
+        <span class="name" id="currentUserName">Guest</span>
+        <div class="avatar-mini" id="currentUserAvatar"><span>👤</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <!-- LEFT COLUMN -->
+    <div class="col">
+      <div class="card hue-pink">
+        <h2><span class="dot"></span>Account</h2>
+        <div class="guest-banner"><span>👋</span><span id="authBannerText">You are a guest. Sign in or create a paid account.</span></div>
+
+        <div class="steps" id="stepBar">
+          <div class="step active" data-step="1">1. Details</div>
+          <div class="step" data-step="2">2. Payment</div>
+          <div class="step" data-step="3">3. Verify</div>
+          <div class="step" data-step="4">4. Done</div>
+        </div>
+
+        <div id="signinView">
+          <div class="form-group"><label>Email</label><input type="email" id="signinEmail" placeholder="you@example.com"></div>
+          <div class="form-group"><label>Password</label><input type="password" id="signinPassword" placeholder="Your password"></div>
+          <button class="btn btn-primary btn-block" id="signinBtn">Sign in</button>
+          <p style="text-align:center;font-size:.73rem;color:var(--muted);margin-top:12px">
+            No account? <a href="#" id="gotoSignup" style="color:var(--brand-1);font-weight:800;text-decoration:none">Create one</a>
+          </p>
+          <div id="signinMsg" class="message"></div>
+        </div>
+
+        <div id="signupView" class="hidden">
+          <div class="plan-box">
+            <strong>⭐ OBSA ACADEMY Membership</strong>
+            <div class="price">ETB 250 <span>/ one-time</span></div>
+            <ul>
+              <li>✅ Full catalog access</li>
+              <li>✅ 8 computer languages</li>
+              <li>✅ Copilot AI tutor</li>
+              <li>✅ Virtual Python compiler</li>
+              <li>✅ Lifetime access</li>
+            </ul>
+          </div>
+          <div class="form-group"><label>Full name</label><input type="text" id="signupName" placeholder="e.g. Alex Rivera"></div>
+          <div class="form-group"><label>Email</label><input type="email" id="signupEmail" placeholder="you@example.com"></div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="signupPassword" placeholder="Strong password">
+            <div class="password-hint">
+              <strong>🔒 Strong password must contain:</strong><br>
+              • at least 8 characters<br>• uppercase & lowercase<br>• at least one number<br>• at least one symbol (!@#$%^&*)
+            </div>
+          </div>
+          <button class="btn btn-primary btn-block" id="toPaymentBtn">Continue to payment →</button>
+          <p style="text-align:center;font-size:.73rem;color:var(--muted);margin-top:12px">
+            Already have an account? <a href="#" id="gotoSignin" style="color:var(--brand-1);font-weight:800;text-decoration:none">Sign in</a>
+          </p>
+          <div id="signupMsg" class="message"></div>
+        </div>
+
+        <div id="paymentView" class="hidden">
+          <h3 style="margin-bottom:12px">💳 Choose payment method</h3>
+          <div class="pay-methods">
+            <div class="pay-method" data-method="telebirr"><span class="icon">📱</span>Telebirr</div>
+            <div class="pay-method" data-method="visa"><span class="icon">💳</span>Visa</div>
+            <div class="pay-method" data-method="mastercard"><span class="icon">💳</span>Mastercard</div>
+            <div class="pay-method" data-method="paypal"><span class="icon">🅿️</span>PayPal</div>
+            <div class="pay-method" data-method="mpesa"><span class="icon">📲</span>M-Pesa</div>
+            <div class="pay-method" data-method="cbe"><span class="icon">🏦</span>CBE Birr</div>
+          </div>
+          <div class="pay-detail">
+            <h4 id="payDetailTitle">Select a method above</h4>
+            <div id="payDetailFields"></div>
+          </div>
+          <div style="margin:6px 0 12px">
+            <div class="summary-row"><span>Membership</span><span>ETB 250.00</span></div>
+            <div class="summary-row"><span>Processing fee</span><span>ETB 0.00</span></div>
+            <div class="summary-row total"><span>Total</span><span>ETB 250.00</span></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary btn-small" id="backToDetailsBtn">← Back</button>
+            <button class="btn btn-primary" id="payNowBtn" style="flex:1" disabled>Pay ETB 250</button>
+          </div>
+          <div id="paymentMsg" class="message"></div>
+        </div>
+
+        <div id="txnView" class="hidden">
+          <div class="pay-success" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:#1e40af;border-color:#93c5fd">
+            <span class="big">🔐</span>
+            Payment received!<br>Verify with your transaction ID.
+          </div>
+          <p style="font-size:.75rem;color:var(--muted);margin:12px 0 8px;line-height:1.6">
+            Copy the <strong>transaction ID</strong> (8–12 chars) from your SMS / email and paste it below.
+          </p>
+          <div class="pay-detail" style="background:#f0fdf4;border-color:#a7f3d0">
+            <h4 style="color:#065f46" id="txnMethodLabel">Awaiting verification…</h4>
+            <div class="form-group"><label>Transaction ID</label><input type="text" id="txnIdInput" placeholder="e.g. CJU5RZ5NM3" maxlength="24"></div>
+            <div class="form-group"><label>Amount paid (ETB)</label><input type="number" id="txnAmountInput" value="250"></div>
+            <div id="txnVerifyMsg" class="message"></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary btn-small" id="backToPaymentBtn">← Back</button>
+            <button class="btn btn-success" id="verifyTxnBtn" style="flex:1">✅ Verify Transaction</button>
+          </div>
+        </div>
+
+        <div id="successView" class="hidden">
+          <div class="pay-success">
+            <span class="big">✅</span>
+            Transaction verified!<br>Your account is active.
+          </div>
+          <div style="margin-top:14px;font-size:.82rem;color:var(--ink-2);text-align:center;line-height:1.7" id="successReceipt"></div>
+          <button class="btn btn-success btn-block" id="enterAppBtn" style="margin-top:14px">Enter OBSA ACADEMY →</button>
+        </div>
+      </div>
+
+      <div class="card hue-green">
+        <h2><span class="dot"></span><span id="profileTitle">Guest Profile</span></h2>
+        <div class="photo-preview">
+          <div class="avatar-lg" id="profileAvatar"><span>👤</span></div>
+          <label for="profilePhotoInput" class="file-label">📸 Change photo</label>
+          <input type="file" id="profilePhotoInput" accept="image/*">
+        </div>
+        <div class="form-group"><label>Bio</label><textarea id="profileBio" placeholder="Tell us about yourself..."></textarea></div>
+        <button class="btn btn-primary btn-block" id="saveProfileBtn">Save profile</button>
+        <div id="profileMsg" class="message"></div>
+        <button class="btn btn-danger btn-block hidden" id="logoutBtn" style="margin-top:10px">Log out</button>
+      </div>
+
+      <div class="card hue-cyan">
+        <h2><span class="dot"></span>Settings</h2>
+        <div class="settings-tabs">
+          <div class="settings-tab active" data-tab="device">📱 Device</div>
+          <div class="settings-tab" data-tab="payment">💳 Payment</div>
+        </div>
+        <div class="settings-panel active" id="panel-device">
+          <div class="form-group"><label>Theme</label><select id="themeSelect"><option value="light">Light</option><option value="dark">Dark</option></select></div>
+          <div class="form-group"><label>Notifications</label><select id="notifSelect"><option value="all">All</option><option value="mentions">Mentions only</option><option value="none">None</option></select></div>
+          <button class="btn btn-secondary btn-block btn-small" id="saveDeviceBtn">Save device settings</button>
+          <div id="deviceMsg" class="message"></div>
+        </div>
+        <div class="settings-panel" id="panel-payment">
+          <div class="form-group">
+            <label>Preferred payment method</label>
+            <select id="paymentSelect">
+              <option value="none">No payment method</option>
+              <option value="telebirr">Telebirr</option>
+              <option value="visa">Visa •••• 4242</option>
+              <option value="mastercard">Mastercard •••• 8888</option>
+              <option value="paypal">PayPal</option>
+              <option value="mpesa">M-Pesa</option>
+              <option value="cbe">CBE Birr</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Telebirr / M-Pesa phone <span class="telebirr-badge">optional</span></label><input type="tel" id="telebirrPhone" placeholder="+251 9XX XXX XXX"></div>
+          <button class="btn btn-primary btn-block btn-small" id="savePaymentBtn">Save payment</button>
+          <div id="paymentMsg2" class="message"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER COLUMN -->
+    <div class="col">
+      <div class="card hue-amber">
+        <h2><span class="dot"></span>Learning Catalog</h2>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:14px;line-height:1.6">
+          🔒 Complete each language in order. Pass the quiz with <strong style="color:var(--brand-2)">50% or higher</strong> to unlock the next.
+        </p>
+        <div id="catalogProgress" style="margin-bottom:16px"></div>
+        <div id="catalogList"></div>
+        <div id="viewerArea"></div>
+      </div>
+
+      <!-- COPILOT AI -->
+      <div class="card hue-cyan">
+        <div class="copilot-header">
+          <div class="copilot-avatar">🤖</div>
+          <div class="copilot-header-info">
+            <strong>Copilot AI · your coding tutor</strong>
+            <small><span class="live-dot"></span>Online · ask anything about programming</small>
+          </div>
+        </div>
+
+        <p style="font-size:.72rem;color:var(--muted);font-weight:700;margin-bottom:8px;letter-spacing:.3px;text-transform:uppercase">💡 What you can ask Copilot</p>
+        <div class="ask-cats">
+          <button class="ask-cat" data-cat="concepts">💡 Concepts</button>
+          <button class="ask-cat" data-cat="code">💻 Code help</button>
+          <button class="ask-cat" data-cat="languages">🌐 Languages</button>
+          <button class="ask-cat" data-cat="quizzes">📝 Quizzes</button>
+          <button class="ask-cat" data-cat="payment">💳 Payment</button>
+          <button class="ask-cat" data-cat="career">🚀 Career</button>
+        </div>
+
+        <div id="askPanel" class="message info" style="display:none;margin-bottom:10px"></div>
+
+        <div class="ai-chat" id="aiChat">
+          <div class="ai-msg bot">
+            <strong>Copilot:</strong> Hi 👋 I'm your OBSA tutor. Ask me anything about C++, Java, HTML, CSS, Python, C#, web development, the quizzes, or how to get started.
+            <span class="msg-meta">just now</span>
+          </div>
+        </div>
+
+        <div class="ai-input-row">
+          <input type="text" id="aiInput" placeholder="Ask Copilot anything…" autocomplete="off">
+          <button class="ai-send" id="aiSendBtn">Ask ➤</button>
+        </div>
+
+        <div class="ai-suggestions">
+          <button class="ai-suggest">What is a pointer?</button>
+          <button class="ai-suggest">Explain OOP with examples</button>
+          <button class="ai-suggest">How do I pass the C++ quiz?</button>
+          <button class="ai-suggest">Show me a Python example</button>
+        </div>
+      </div>
+
+      <!-- COMPILER -->
+      <div class="card hue-green">
+        <h2><span class="dot"></span>Virtual Compiler · Python</h2>
+        <p style="font-size:.75rem;color:var(--muted);margin-bottom:10px;line-height:1.5">
+          Write Python code and click <strong>▶ Run</strong>. Runs entirely in your browser.
+        </p>
+        <textarea class="code-editor" id="codeEditor" spellcheck="false"># OBSA ACADEMY — Python Playground
+def greet(name):
+    return f"Hello, {name}!"
+
+print(greet("OBSA Academy"))
+
+for i in range(1, 6):
+    print(i, "squared =", i ** 2)
+</textarea>
+        <div class="code-toolbar">
+          <button class="btn btn-success btn-small" id="runCodeBtn">▶ Run</button>
+          <button class="btn btn-secondary btn-small" id="clearOutputBtn">🗑 Clear</button>
+          <button class="btn btn-secondary btn-small" id="resetCodeBtn">↺ Reset</button>
+        </div>
+        <div class="code-output" id="codeOutput">— output will appear here —</div>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot"></span>Create post <span style="font-size:.68rem;font-weight:500;color:var(--muted)">(guests welcome)</span></h2>
+        <div class="composer-tabs">
+          <div class="composer-tab active" data-type="text">📝 Text</div>
+          <div class="composer-tab" data-type="image">🖼️ Image</div>
+          <div class="composer-tab" data-type="video">🎬 Video</div>
+        </div>
+        <div class="form-group"><textarea id="postText" placeholder="What's on your mind?"></textarea></div>
+        <div id="mediaInputArea" class="hidden">
+          <div class="form-group"><label id="mediaLabel">Choose file</label><input type="file" id="postMediaInput"></div>
+        </div>
+        <div id="composerPreview" class="composer-preview hidden"></div>
+        <button class="btn btn-primary btn-block" id="createPostBtn" style="margin-top:10px">Publish</button>
+        <div id="postMsg" class="message"></div>
+      </div>
+
+      <div class="card hue-pink">
+        <h2><span class="dot"></span>Feed</h2>
+        <div class="scroll-area" id="feedContainer"><div class="empty-msg">No posts yet. Be the first!</div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="col">
+      <div class="card hue-cyan">
+        <h2><span class="dot"></span>Inbox (admin)</h2>
+        <p style="font-size:.72rem;color:var(--muted);margin-bottom:10px;line-height:1.5">
+          Sign-ins, payments, quiz results, transactions, tutorial views.
+        </p>
+        <div class="scroll-area" id="inboxContainer"></div>
+      </div>
+      <div class="card hue-green">
+        <h2><span class="dot"></span>Quick info</h2>
+        <ul class="info-list">
+          <li>YouTube + Wikipedia tutorials</li>
+          <li>8 languages, sequential</li>
+          <li>10-question quiz each</li>
+          <li>50% = pass</li>
+          <li>Telebirr / Visa / M-Pesa</li>
+          <li>Verify by transaction ID</li>
+          <li>Copilot AI + Python compiler</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">OBSA ACADEMY · learn · build · get certified</div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  const DB = {
+    USERS:'obsa_users', POSTS:'obsa_posts', INBOX:'obsa_inbox',
+    SESSION:'obsa_session', GUEST:'obsa_guest', DEVICE:'obsa_device', PAYMENT:'obsa_payment',
+    PAYMENTS:'obsa_payments', PROGRESS:'obsa_progress', VIEWED:'obsa_viewed',
+    TXNS:'obsa_txns', AI:'obsa_ai_chat',
+    get(k){ try{ return JSON.parse(localStorage.getItem(k)) || []; }catch(e){ return []; } },
+    set(k,v){ localStorage.setItem(k, JSON.stringify(v)); },
+    getObj(k){ try{ return JSON.parse(localStorage.getItem(k)) || {}; }catch(e){ return {}; } },
+    setObj(k,v){ localStorage.setItem(k, JSON.stringify(v)); },
+    getUsers(){ return this.get(this.USERS); },
+    saveUsers(u){ this.set(this.USERS,u); },
+    findUser(email){ return this.getUsers().find(x=>x.email.toLowerCase()===email.toLowerCase()); },
+    addUser(u){ const a=this.getUsers(); a.push(u); this.saveUsers(a); return u; },
+    getPosts(){ return this.get(this.POSTS); },
+    savePosts(p){ this.set(this.POSTS,p); },
+    addPost(p){ const a=this.getPosts(); a.unshift(p); this.savePosts(a); return p; },
+    updatePost(id,upd){ const a=this.getPosts(); const i=a.findIndex(x=>x.id===id); if(i!==-1){ a[i]={...a[i],...upd}; this.savePosts(a); } },
+    deletePost(id){ const a=this.getPosts().filter(p=>p.id!==id); this.savePosts(a); },
+    getInbox(){ return this.get(this.INBOX); },
+    addInbox(m){ const a=this.getInbox(); a.unshift(m); this.set(this.INBOX,a); },
+    getSession(){ return this.getObj(this.SESSION); },
+    setSession(u){ this.setObj(this.SESSION,u); },
+    clearSession(){ localStorage.removeItem(this.SESSION); },
+    getGuest(){ return this.getObj(this.GUEST); },
+    setGuest(g){ this.setObj(this.GUEST,g); },
+    getDevice(){ return this.getObj(this.DEVICE); },
+    setDevice(d){ this.setObj(this.DEVICE,d); },
+    getPayment(){ return this.getObj(this.PAYMENT); },
+    setPayment(p){ this.setObj(this.PAYMENT,p); },
+    getPayments(){ return this.get(this.PAYMENTS); },
+    addPayment(p){ const a=this.getPayments(); a.unshift(p); this.set(this.PAYMENTS,a); return p; },
+    getProgressAll(){ return this.getObj(this.PROGRESS); },
+    setProgressAll(p){ this.setObj(this.PROGRESS,p); },
+    getProgress(key){ const all=this.getProgressAll(); return all[key]||{completed:[],failedAttempts:{}}; },
+    setProgress(key,val){ const all=this.getProgressAll(); all[key]=val; this.setProgressAll(all); },
+    getViewedAll(){ return this.getObj(this.VIEWED); },
+    setViewedAll(v){ this.setObj(this.VIEWED,v); },
+    getViewed(key){ const all=this.getViewedAll(); return all[key]||[]; },
+    markViewed(key,tutKey){ const all=this.getViewedAll(); const arr=all[key]||[]; if(arr.indexOf(tutKey)===-1){ arr.push(tutKey); all[key]=arr; this.setViewedAll(all); } },
+    isViewed(key,tutKey){ return this.getViewed(key).indexOf(tutKey)!==-1; },
+    getTxns(){ return this.get(this.TXNS); },
+    addTxn(t){ const a=this.getTxns(); a.unshift(t); this.set(this.TXNS,a); return t; },
+    findTxn(id){ return this.getTxns().find(t=>t.txnId.toUpperCase()===id.toUpperCase()); },
+    getAiChat(){ return this.get(this.AI); },
+    setAiChat(c){ this.set(this.AI,c); }
+  };
+
+  if(DB.getInbox().length===0){
+    DB.addInbox({id:'welcome',from:'OBSA System',email:'system@obsa.com',text:'Welcome admin! Everything appears here.',time:new Date().toISOString()});
+  }
+
+  function isStrongPassword(p){
+    return p.length>=8 && /[A-Z]/.test(p) && /[a-z]/.test(p) && /[0-9]/.test(p) && /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p);
+  }
+  function showMsg(el,text,isErr,type){
+    if(!el) return;
+    let cls='message ';
+    if(type==='info') cls+='info';
+    else if(type==='success' || isErr===false) cls+='success';
+    else cls+='error';
+    el.textContent=text; el.className=cls;
+    clearTimeout(el._t);
+    el._t=setTimeout(()=>{ el.textContent=''; el.className='message'; },4500);
+  }
+  function toast(text,type){
+    const c=document.getElementById('toastContainer');
+    if(!c) return;
+    const t=document.createElement('div');
+    t.className='toast '+(type||'');
+    const icons={success:'✅',error:'❌',warning:'⚠️','':'ℹ️'};
+    t.innerHTML=(icons[type]||'ℹ️')+' '+text;
+    c.appendChild(t);
+    setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(40px)'; t.style.transition='.35s';
+      setTimeout(()=>t.remove(),350); },3200);
+  }
+  function formatTime(iso){
+    const d=new Date(iso), n=new Date(), s=Math.floor((n-d)/1000);
+    if(s<60) return 'just now';
+    if(s<3600) return Math.floor(s/60)+'m ago';
+    if(s<86400) return Math.floor(s/3600)+'h ago';
+    return d.toLocaleDateString();
+  }
+  function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+  function esc(t){ if(!t) return ''; return String(t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+  function randomRef(prefix){ return prefix.toUpperCase()+'-'+Date.now().toString(36).toUpperCase()+'-'+Math.floor(Math.random()*9999); }
+
+  const YOUTUBE_VIDEOS = {
+    cpp:{id:'8jLOx1hD3_o'}, java:{id:'grEKMHGYyns'}, html:{id:'qz0aGYrrlhU'},
+    css:{id:'1Rs2ND1ryYc'}, python:{id:'rfscVS0vtbw'}, csharp:{id:'GhQdlMFKEE4'},
+    web:{id:'nu_pCVPKzTk'}, advanced:{id:'Z1Yd7upQsXY'}
+  };
+  const WIKI_PDFS = {
+    cpp:{article:'C%2B%2B'}, java:{article:'Java_(programming_language)'}, html:{article:'HTML'},
+    css:{article:'CSS'}, python:{article:'Python_(programming_language)'},
+    csharp:{article:'C_Sharp_(programming_language)'}, web:{article:'Web_development'},
+    advanced:{article:'Software_engineering'}
+  };
+
+  let currentUser=null;
+  let activeComposerType='text';
+  let pendingMedia=null, pendingMediaType=null;
+  let pendingSignup=null, pendingPayment=null;
+  let selectedPayMethod=null;
+  let quizState=null, editingPostId=null;
+
+  const $=(id)=>document.getElementById(id);
+
+  function myIdentity(){
+    if(currentUser) return {id:currentUser.id, name:currentUser.name, photo:currentUser.photo||''};
+    const g=DB.getGuest();
+    return {id:'guest', name:'Guest', photo:g.photo||''};
+  }
+  function isOwner(post){ return post.authorId===myIdentity().id; }
+
+  // Curriculum (10-question quizzes per language)
+  const CURRICULUM = [
+    { id:'cpp', name:'C++', icon:'C++', order:1, desc:'High-performance programming. Pointers, OOP, STL.',
+      tutorials:[
+        {type:'pdf', name:'C++ Wikipedia PDF', size:'Wikipedia'},
+        {type:'video', name:'C++ Full Course', size:'YouTube'}
+      ],
+      quiz:[
+        {q:'What does "cout" do in C++?',o:['Reads input','Prints output','Declares a variable','Loops'],a:1},
+        {q:'Which symbol starts a preprocessor directive?',o:['@','#','$','%'],a:1},
+        {q:'Correct way to declare an integer?',o:['int x;','integer x;','x int;','num x;'],a:0},
+        {q:'Operator for pointer access?',o:['.','->','::','=>'],a:1},
+        {q:'OOP stands for?',o:['Object Oriented Programming','Open Output Process','Only Output Programs','Ordered Object Protocol'],a:0},
+        {q:'C++ source file extension?',o:['.cp','.cpp','.c++','.cx'],a:1},
+        {q:'What is "std" in C++?',o:['A variable','The standard namespace','A function','A class'],a:1},
+        {q:'Which loop runs at least once?',o:['for','while','do-while','foreach'],a:2},
+        {q:'What does "cin" do?',o:['Prints output','Reads input','Declares a class','Defines a macro'],a:1},
+        {q:'Keyword to allocate memory?',o:['alloc','malloc','new','create'],a:2}
+      ]
+    },
+    { id:'java', name:'Java', icon:'J', order:2, desc:'Write once, run anywhere. JVM, classes, enterprise.',
+      tutorials:[{type:'pdf',name:'Java Wikipedia PDF',size:'Wikipedia'},{type:'video',name:'Java Full Course',size:'YouTube'}],
+      quiz:[
+        {q:'Java was developed by?',o:['Microsoft','Sun Microsystems','Oracle','IBM'],a:1},
+        {q:'JVM stands for?',o:['Java Virtual Machine','Java Verified Module','Just Virtual Memory','Java Version Manager'],a:0},
+        {q:'Java entry point method?',o:['start()','run()','main()','init()'],a:2},
+        {q:'Java source extension?',o:['.jav','.jv','.java','.j'],a:2},
+        {q:'Keyword to inherit in Java?',o:['inherits','extends','implements','super'],a:1},
+        {q:'Primitive type in Java?',o:['String','Integer','int','Array'],a:2},
+        {q:'Collection for key-value?',o:['List','Set','Map','Queue'],a:2},
+        {q:'Default value of int field?',o:['1','0','null','-1'],a:1},
+        {q:'Keyword prevents inheritance?',o:['static','final','private','sealed'],a:1},
+        {q:'"public static void main" is?',o:['Entry method','A constructor','An interface','A variable'],a:0}
+      ]
+    },
+    { id:'html', name:'HTML', icon:'<>', order:3, desc:'Structure the web with semantic markup.',
+      tutorials:[{type:'pdf',name:'HTML Wikipedia PDF',size:'Wikipedia'},{type:'video',name:'HTML Crash Course',size:'YouTube'}],
+      quiz:[
+        {q:'HTML stands for?',o:['Hyper Text Markup Language','High Tech Modern Language','Hyperlink Text Mark Language','Home Tool Markup Language'],a:0},
+        {q:'Largest heading tag?',o:['<h6>','<h1>','<head>','<big>'],a:1},
+        {q:'Tag embeds an image?',o:['<img>','<image>','<pic>','<src>'],a:0},
+        {q:'Attribute for image URL?',o:['link','href','src','url'],a:2},
+        {q:'Tag creates a hyperlink?',o:['<link>','<a>','<href>','<nav>'],a:1},
+        {q:'Tag groups navigation?',o:['<nav>','<menu>','<div>','<links>'],a:0},
+        {q:'HTML5 doctype?',o:['<!DOCTYPE html>','<!DOCTYPE HTML5>','<doctype html>','<!html>'],a:0},
+        {q:'Input type for checkbox?',o:['type="check"','type="box"','type="checkbox"','type="tick"'],a:2},
+        {q:'Tag holds metadata?',o:['<meta>','<head>','<info>','<data>'],a:1},
+        {q:'Line break tag?',o:['<lb>','<break>','<br>','<newline>'],a:2}
+      ]
+    },
+    { id:'css', name:'CSS', icon:'{}', order:4, desc:'Style, layout, animate. Flexbox, Grid, responsive.',
+      tutorials:[{type:'pdf',name:'CSS Wikipedia PDF',size:'Wikipedia'},{type:'video',name:'CSS Crash Course',size:'YouTube'}],
+      quiz:[
+        {q:'CSS stands for?',o:['Computer Style Sheets','Cascading Style Sheets','Creative Style System','Colorful Style Sheets'],a:1},
+        {q:'Property changes text color?',o:['font-color','text-color','color','foreground'],a:2},
+        {q:'Selector targets an ID?',o:['.id','#id','*id','@id'],a:1},
+        {q:'Display value for flexbox?',o:['block','flex','grid','inline'],a:1},
+        {q:'Property sets space inside?',o:['margin','padding','gap','border'],a:1},
+        {q:'Unit relative to root font size?',o:['px','em','rem','vh'],a:2},
+        {q:'Property adds box shadow?',o:['shadow','box-shadow','drop-shadow','shadow-box'],a:1},
+        {q:'Pseudo-class for hover?',o:[':focus',':hover',':active',':visited'],a:1},
+        {q:'Property controls stacking?',o:['stack','z-index','order','layer'],a:1},
+        {q:'Value makes a grid container?',o:['display:grid','display:flex','display:block','display:table'],a:0}
+      ]
+    },
+    { id:'python', name:'Python', icon:'Py', order:5, desc:'Friendly language. Data, web, AI, automation.',
+      tutorials:[{type:'pdf',name:'Python Wikipedia PDF',size:'Wikipedia'},{type:'video',name:'Python Full Course',size:'YouTube'}],
+      quiz:[
+        {q:'Python created by?',o:['Guido van Rossum','James Gosling','Dennis Ritchie','Bjarne Stroustrup'],a:0},
+        {q:'Keyword defines a function?',o:['func','def','function','fun'],a:1},
+        {q:'Correct file extension?',o:['.py','.python','.pt','.pyt'],a:0},
+        {q:'Immutable type?',o:['list','dict','tuple','set'],a:2},
+        {q:'How do you write a comment?',o:['//','#','/* */','--'],a:1},
+        {q:'Method adds to a list?',o:['push','add','append','insert'],a:2},
+        {q:'Symbol for exponent?',o:['^','**','^^','exp'],a:1},
+        {q:'What does len() do?',o:['Length of sequence','Last element','Loop count','Log entry'],a:0},
+        {q:'Keyword handles exceptions?',o:['catch','except','rescue','handle'],a:1},
+        {q:'Block always runs after try?',o:['finally','done','end','always'],a:0}
+      ]
+    },
+    { id:'csharp', name:'C#', icon:'C#', order:6, desc:'Modern .NET language for apps and games.',
+      tutorials:[{type:'pdf',name:'C# Wikipedia PDF',size:'Wikipedia'},{type:'video',name:'C# Full Course',size:'YouTube'}],
+      quiz:[
+        {q:'C# created by?',o:['Microsoft','Sun','Google','Apple'],a:0},
+        {q:'C# runtime?',o:['JVM','.NET','V8','CPython'],a:1},
+        {q:'Keyword declares a variable?',o:['var','let','dim','set'],a:0},
+        {q:'C# entry point?',o:['start()','main()','Main()','run()'],a:2},
+        {q:'Keyword creates a class?',o:['class','struct','object','type'],a:0},
+        {q:'LINQ stands for?',o:['Language Integrated Query','Linked INternet Query','Local Index Query','Linear Query'],a:0},
+        {q:'Keyword for async methods?',o:['await','async','task','yield'],a:1},
+        {q:'Which is a value type?',o:['string','int','object','class'],a:1},
+        {q:'Keyword throws an exception?',o:['raise','throw','error','panic'],a:1},
+        {q:'C# file extension?',o:['.cs','.csharp','.c#','.net'],a:0}
+      ]
+    },
+    { id:'web', name:'Web Development', icon:'🌐', order:7, desc:'Full-stack web. Frontend, backend, APIs.',
+      tutorials:[{type:'pdf',name:'Web Development Wikipedia PDF',size:'Wikipedia'},{type:'video',name:'Web Dev Course',size:'YouTube'}],
+      quiz:[
+        {q:'HTTP stands for?',o:['HyperText Transfer Protocol','High Tech Transfer Process','Hyperlink Transfer Text Protocol','Home Tool Transfer Protocol'],a:0},
+        {q:'HTTP method fetches data?',o:['POST','GET','PUT','DELETE'],a:1},
+        {q:'Common API format?',o:['JSON','DOCX','MP3','EXE'],a:0},
+        {q:'CSS handles?',o:['Structure','Styling','Database','Server'],a:1},
+        {q:'JS adds to a page?',o:['Interactivity','Layout only','Images only','Nothing'],a:0},
+        {q:'REST API is?',o:['An architectural style for APIs','A database','A CSS framework','A JavaScript library'],a:0},
+        {q:'HTTPS default port?',o:['80','443','8080','21'],a:1},
+        {q:'CDN stands for?',o:['Content Delivery Network','Central Data Node','Cloud Data Name','Client Data Network'],a:0},
+        {q:'"full-stack" means?',o:['Only frontend','Only backend','Both frontend & backend','Only database'],a:2},
+        {q:'Tool manages JS packages?',o:['npm','pip','gem','cargo'],a:0}
+      ]
+    },
+    { id:'advanced', name:'Advanced Projects', icon:'★', order:8, desc:'Capstone: build real apps.',
+      tutorials:[{type:'pdf',name:'Software Engineering PDF',size:'Wikipedia'},{type:'video',name:'Advanced Programming',size:'YouTube'}],
+      quiz:[
+        {q:'First step of a project?',o:['Code','Plan & design','Deploy','Test'],a:1},
+        {q:'MVC stands for?',o:['Model View Controller','Main View Code','Module Version Control','Multi View Class'],a:0},
+        {q:'Git is used for?',o:['Version control','Styling','Databases','Hosting only'],a:0},
+        {q:'Unit testing is?',o:['Testing individual parts','Testing the whole app','Manual clicking','Deployment'],a:0},
+        {q:'CI/CD stands for?',o:['Continuous Integration/Delivery','Code Inspection/Deployment','Complex Integration/Design','Central Input/Data'],a:0},
+        {q:'Which is a code smell?',o:['Long functions','Short names','Comments','Tests'],a:0},
+        {q:'Design pattern is?',o:['A reusable solution','A bug','A library','A framework'],a:0},
+        {q:'DRY means?',o:["Don't Repeat Yourself",'Do Repeat Yourself','Data Ready Yield','Deploy Run Yield'],a:0},
+        {q:'Refactoring is?',o:['Improving code without changing behavior','Rewriting from scratch','Deleting code','Adding features'],a:0},
+        {q:'Before deploying you should?',o:['Test','Delete tests','Skip review','Ignore bugs'],a:0}
+      ]
+    }
+  ];
+
+  function progressKey(){ return currentUser ? 'user:'+currentUser.id : 'guest'; }
+  function getProgress(){ return DB.getProgress(progressKey()); }
+  function setProgress(p){ DB.setProgress(progressKey(), p); }
+  function isCompleted(langId){ const p=getProgress(); return (p.completed||[]).indexOf(langId)!==-1; }
+  function isUnlocked(langId){
+    const lang=CURRICULUM.find(l=>l.id===langId);
+    if(!lang) return false;
+    if(lang.order===1) return true;
+    const prev=CURRICULUM.find(l=>l.order===lang.order-1);
+    return prev ? isCompleted(prev.id) : false;
+  }
+  function completedCount(){ const p=getProgress(); return (p.completed||[]).length; }
+
+  function renderMode(){
+    const modeText=$('modeText');
+    const authBanner=$('authBannerText');
+    const logoutBtn=$('logoutBtn');
+    const profileTitle=$('profileTitle');
+
+    if(currentUser){
+      modeText.textContent=currentUser.name||'User';
+      authBanner.textContent='Signed in as '+(currentUser.email||currentUser.name);
+      $('signinView').classList.add('hidden');
+      $('signupView').classList.add('hidden');
+      $('paymentView').classList.add('hidden');
+      $('txnView').classList.add('hidden');
+      $('successView').classList.add('hidden');
+      $('stepBar').classList.add('hidden');
+      logoutBtn.classList.remove('hidden');
+      profileTitle.textContent=currentUser.name+"'s Profile";
+      $('currentUserName').textContent=currentUser.name||'User';
+      if(currentUser.photo){
+        $('currentUserAvatar').innerHTML='<img src="'+currentUser.photo+'">';
+        $('profileAvatar').innerHTML='<img src="'+currentUser.photo+'">';
+      } else {
+        $('currentUserAvatar').innerHTML='<span>👤</span>';
+        $('profileAvatar').innerHTML='<span>👤</span>';
+      }
+      $('profileBio').value=currentUser.bio||'';
+    } else {
+      modeText.textContent='Guest';
+      authBanner.textContent='You are a guest. Sign in or create a paid account.';
+      $('signinView').classList.remove('hidden');
+      $('signupView').classList.add('hidden');
+      $('paymentView').classList.add('hidden');
+      $('txnView').classList.add('hidden');
+      $('successView').classList.add('hidden');
+      logoutBtn.classList.add('hidden');
+      profileTitle.textContent='Guest Profile';
+      $('currentUserName').textContent='Guest';
+      const g=DB.getGuest();
+      if(g.photo){
+        $('currentUserAvatar').innerHTML='<img src="'+g.photo+'">';
+        $('profileAvatar').innerHTML='<img src="'+g.photo+'">';
+      } else {
+        $('currentUserAvatar').innerHTML='<span>👤</span>';
+        $('profileAvatar').innerHTML='<span>👤</span>';
+      }
+      $('profileBio').value=g.bio||'';
+    }
+  }
+
+  function renderCatalog(){
+    const list=$('catalogList');
+    const progDiv=$('catalogProgress');
+    const done=completedCount();
+    const total=CURRICULUM.length;
+    const pct=Math.round((done/total)*100);
+
+    progDiv.innerHTML=`
+      <div style="display:flex;justify-content:space-between;font-size:.8rem;font-weight:800;color:var(--ink-2);margin-bottom:6px">
+        <span>Your progress</span><span>${done} / ${total} languages</span>
+      </div>
+      <div class="progress-bar"><div class="fill" style="width:${pct}%"></div></div>
+      ${!currentUser?'<p style="font-size:.7rem;color:var(--muted);margin-top:8px">⚠️ Guest progress is temporary. Sign up to save.</p>':''}
+    `;
+
+    list.innerHTML = CURRICULUM.map(lang=>{
+      const locked=!isUnlocked(lang.id);
+      const completed=isCompleted(lang.id);
+      const cls='lang-card'+(locked?' locked':'')+(completed?' completed':'');
+      let status, statusCls, actionBtn='';
+      if(completed){
+        status='✅ Completed'; statusCls='completed';
+        actionBtn=`<button class="btn btn-secondary btn-small" data-view="${lang.id}">Review</button>
+                   <button class="btn btn-secondary btn-small" data-quiz="${lang.id}">Retake</button>`;
+      } else if(locked){
+        status='🔒 Locked'; statusCls='locked';
+        actionBtn='<button class="btn btn-secondary btn-small" disabled>Locked</button>';
+      } else {
+        status='🔓 Unlocked'; statusCls='available';
+        actionBtn=`<button class="btn btn-primary btn-small" data-view="${lang.id}">Start</button>
+                   <button class="btn btn-success btn-small" data-quiz="${lang.id}">Quiz</button>`;
+      }
+
+      return `
+        <div class="${cls}">
+          <div class="lang-icon">${lang.icon}</div>
+          <div class="lang-info">
+            <strong>${lang.order}. ${lang.name}</strong>
+            <small>${lang.desc}</small>
+            <div class="lang-meta">
+              <span class="lang-tag pdf">📄 ${lang.tutorials.filter(t=>t.type==='pdf').length} PDF</span>
+              <span class="lang-tag video">▶ ${lang.tutorials.filter(t=>t.type==='video').length} YouTube</span>
+              <span class="lang-tag quiz">📝 10 Q</span>
+            </div>
+          </div>
+          <div class="lang-action">
+            <span class="lang-status ${statusCls}">${status}</span>
+            ${actionBtn}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function openViewer(langId){
+    const lang=CURRICULUM.find(l=>l.id===langId);
+    if(!lang) return;
+    if(!isUnlocked(langId)){ toast('This language is locked.','warning'); return; }
+    const area=$('viewerArea');
+    const pKey=progressKey();
+
+    area.innerHTML=`
+      <div class="viewer">
+        <div class="viewer-head">
+          <h3>📖 ${lang.name} — Tutorials</h3>
+          <button class="btn btn-secondary btn-small" id="closeViewerBtn">✕ Close</button>
+        </div>
+        <ul class="tutorial-list">
+          ${lang.tutorials.map((t,i)=>{
+            const viewed=DB.isViewed(pKey, lang.id+'::'+i);
+            return `
+              <li class="tutorial-row ${t.type} ${viewed?'viewed':''}"
+                  data-lang="${lang.id}" data-index="${i}" data-type="${t.type}">
+                <span><span class="type ${t.type}">${t.type.toUpperCase()}</span> <span class="name">${esc(t.name)}</span></span>
+                <span style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:.72rem;color:var(--muted)">${t.size}</span>
+                  <span class="open-icon">${viewed?'✓ opened':(t.type==='video'?'▶ Open':'📖 Open')}</span>
+                </span>
+              </li>`;
+          }).join('')}
+        </ul>
+        <button class="btn btn-success btn-block" style="margin-top:14px" id="startQuizFromViewer" data-lang="${lang.id}">
+          📝 Take the ${lang.name} Quiz
+        </button>
+      </div>
+    `;
+
+    $('closeViewerBtn').addEventListener('click',()=>{ area.innerHTML=''; });
+    $('startQuizFromViewer').addEventListener('click',()=>{ openQuiz(lang.id); });
+
+    area.querySelectorAll('.tutorial-row').forEach(row=>{
+      row.addEventListener('click',()=>{
+        const lid=row.dataset.lang, idx=parseInt(row.dataset.index,10), type=row.dataset.type;
+        const lg=CURRICULUM.find(l=>l.id===lid);
+        const tut=lg.tutorials[idx];
+        DB.markViewed(pKey, lid+'::'+idx);
+        row.classList.add('viewed');
+        const icon=row.querySelector('.open-icon'); if(icon) icon.textContent='✓ opened';
+        DB.addInbox({id:uid(),from:'Tutorial',email:currentUser?currentUser.email:'guest',
+          text:(currentUser?currentUser.name:'Guest')+' opened '+tut.name+' in '+lg.name+'.',time:new Date().toISOString()});
+        if(type==='video') openVideoModal(lg, tut);
+        else openPdfModal(lg, tut);
+      });
+    });
+  }
+
+  function openVideoModal(lang, tut){
+    const v=YOUTUBE_VIDEOS[lang.id]||YOUTUBE_VIDEOS.cpp;
+    const embedUrl=`https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0`;
+    const watchUrl=`https://www.youtube.com/watch?v=${v.id}`;
+    const modal=document.createElement('div');
+    modal.className='media-modal';
+    modal.innerHTML=`
+      <div class="media-modal-content">
+        <div class="media-modal-head">
+          <h3>▶ ${esc(tut.name)} <span>· ${lang.name}</span></h3>
+          <div class="media-modal-actions">
+            <a class="btn btn-secondary btn-small" href="${watchUrl}" target="_blank">↗ YouTube</a>
+            <button class="btn btn-secondary btn-small" id="closeModalBtn">✕ Close</button>
+          </div>
+        </div>
+        <div class="media-modal-body" style="padding:0;background:#000">
+          <iframe src="${embedUrl}" style="width:100%;height:70vh;border:0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.querySelector('#closeModalBtn').onclick=()=>modal.remove();
+    modal.onclick=(e)=>{ if(e.target===modal) modal.remove(); };
+    document.addEventListener('keydown',function esc(e){ if(e.key==='Escape'){ modal.remove(); document.removeEventListener('keydown',esc);} });
+  }
+
+  function openPdfModal(lang, tut){
+    const w=WIKI_PDFS[lang.id]||WIKI_PDFS.cpp;
+    const pdfUrl=`https://en.wikipedia.org/api/rest_v1/page/pdf/${w.article}`;
+    const pageUrl=`https://en.wikipedia.org/wiki/${decodeURIComponent(w.article)}`;
+    const modal=document.createElement('div');
+    modal.className='media-modal';
+    modal.innerHTML=`
+      <div class="media-modal-content">
+        <div class="media-modal-head">
+          <h3>📖 ${esc(tut.name)} <span>· ${lang.name}</span></h3>
+          <div class="media-modal-actions">
+            <a class="btn btn-secondary btn-small" href="${pageUrl}" target="_blank">↗ Article</a>
+            <a class="btn btn-secondary btn-small" href="${pdfUrl}" target="_blank" download>⬇ PDF</a>
+            <button class="btn btn-secondary btn-small" id="closeModalBtn">✕ Close</button>
+          </div>
+        </div>
+        <div class="media-modal-body" style="padding:0;background:#fff">
+          <iframe src="${pdfUrl}" style="width:100%;height:70vh;border:0"
+            title="${esc(tut.name)}"></iframe>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.querySelector('#closeModalBtn').onclick=()=>modal.remove();
+    modal.onclick=(e)=>{ if(e.target===modal) modal.remove(); };
+    document.addEventListener('keydown',function esc(e){ if(e.key==='Escape'){ modal.remove(); document.removeEventListener('keydown',esc);} });
+  }
+
+  function openQuiz(langId){
+    const lang=CURRICULUM.find(l=>l.id===langId);
+    if(!lang) return;
+    if(!isUnlocked(langId)){ toast('This language is locked.','warning'); return; }
+    quizState={langId:lang.id, questions:lang.quiz, answers:new Array(lang.quiz.length).fill(-1), submitted:false, score:0};
+    renderQuiz();
+  }
+
+  function renderQuiz(){
+    if(!quizState) return;
+    const lang=CURRICULUM.find(l=>l.id===quizState.langId);
+    const area=$('viewerArea');
+    const qs=quizState.questions;
+
+    if(quizState.submitted){
+      const score=quizState.score;
+      const pct=Math.round((score/qs.length)*100);
+      const pass=pct>=50;
+      const prog=getProgress();
+      if(pass && !isCompleted(lang.id)){
+        const completed=prog.completed||[]; completed.push(lang.id);
+        prog.completed=completed; setProgress(prog);
+        DB.addInbox({id:uid(),from:'Quiz',email:currentUser?currentUser.email:'guest',
+          text:(currentUser?currentUser.name:'Guest')+' PASSED '+lang.name+' with '+pct+'%',time:new Date().toISOString()});
+        toast('🎉 Passed! Next language unlocked.','success');
+      } else if(!pass){
+        const f=prog.failedAttempts||{}; f[lang.id]=(f[lang.id]||0)+1;
+        prog.failedAttempts=f; setProgress(prog);
+        DB.addInbox({id:uid(),from:'Quiz',email:currentUser?currentUser.email:'guest',
+          text:(currentUser?currentUser.name:'Guest')+' FAILED '+lang.name+' with '+pct+'%',time:new Date().toISOString()});
+        toast('❌ Failed. Need 50%+.','error');
+      }
+
+      area.innerHTML=`
+        <div class="quiz-wrap">
+          <div class="quiz-head">
+            <h3>📝 ${lang.name} Quiz Result</h3>
+            <button class="btn btn-secondary btn-small" id="closeQuizBtn">✕ Close</button>
+          </div>
+          <div class="quiz-score ${pass?'pass':'fail'}">
+            <span class="pct">${pct}%</span>
+            ${pass?'🎉 PASSED!':'❌ FAILED'}
+          </div>
+          <div class="quiz-result-detail">
+            You answered <strong>${score}</strong> out of <strong>${qs.length}</strong> correctly.<br>
+            ${pass?'You may proceed.':'You need 50% or more. Please retake.'}
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-primary" id="retakeQuizBtn">🔄 Retake</button>
+            ${pass?'<button class="btn btn-success" id="nextLangBtn">➡️ Next</button>':''}
+          </div>
+        </div>`;
+      $('closeQuizBtn').onclick=()=>{ quizState=null; area.innerHTML=''; renderCatalog(); };
+      $('retakeQuizBtn').onclick=()=>openQuiz(lang.id);
+      if(pass){
+        $('nextLangBtn').onclick=()=>{
+          const next=CURRICULUM.find(l=>l.order===lang.order+1);
+          quizState=null; area.innerHTML=''; renderCatalog();
+          if(next) openViewer(next.id);
+          else toast('🎉 Entire catalog completed!','success');
+        };
+      }
+      renderCatalog();
+      return;
+    }
+
+    area.innerHTML=`
+      <div class="quiz-wrap">
+        <div class="quiz-head">
+          <h3>📝 ${lang.name} Quiz</h3>
+          <span class="quiz-progress" id="quizProg">0 / ${qs.length}</span>
+        </div>
+        <div id="quizQuestions"></div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-secondary btn-small" id="cancelQuizBtn">Cancel</button>
+          <button class="btn btn-primary" id="submitQuizBtn" style="flex:1">Submit</button>
+        </div>
+        <div id="quizMsg" class="message"></div>
+      </div>`;
+
+    const qc=$('quizQuestions');
+    qc.innerHTML=qs.map((q,qi)=>`
+      <div class="quiz-q">
+        <div class="q-num">Question ${qi+1} of ${qs.length}</div>
+        <div class="q-text">${esc(q.q)}</div>
+        ${q.o.map((opt,oi)=>`
+          <label class="quiz-opt" data-q="${qi}" data-o="${oi}">
+            <input type="radio" name="q${qi}" value="${oi}">
+            <span>${esc(opt)}</span>
+          </label>`).join('')}
+      </div>`).join('');
+
+    qc.querySelectorAll('.quiz-opt').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const qi=parseInt(el.dataset.q,10), oi=parseInt(el.dataset.o,10);
+        quizState.answers[qi]=oi;
+        qc.querySelectorAll('.quiz-opt[data-q="'+qi+'"]').forEach(x=>x.classList.remove('selected'));
+        el.classList.add('selected');
+        const ans=quizState.answers.filter(a=>a!==-1).length;
+        $('quizProg').textContent=ans+' / '+qs.length;
+      });
+    });
+
+    $('cancelQuizBtn').onclick=()=>{ quizState=null; area.innerHTML=''; };
+    $('submitQuizBtn').onclick=()=>{
+      const u=quizState.answers.filter(a=>a===-1).length;
+      if(u>0){ showMsg($('quizMsg'),'Answer all '+qs.length+' questions. '+u+' remaining.'); return; }
+      let score=0;
+      qs.forEach((q,i)=>{ if(quizState.answers[i]===q.a) score++; });
+      quizState.score=score;
+      quizState.submitted=true;
+      renderQuiz();
+    };
+  }
+
+  function renderInbox(){
+    const c=$('inboxContainer');
+    const items=DB.getInbox();
+    if(items.length===0){ c.innerHTML='<div class="empty-msg">No messages</div>'; return; }
+    c.innerHTML=items.map(m=>{
+      let cls='inbox-item';
+      if(m.from==='Payment') cls+=' payment';
+      if(m.from==='Quiz') cls+=' quiz';
+      if(m.from==='Transaction') cls+=' txn';
+      return `<div class="${cls}">
+        <div><span class="from">${esc(m.from)}</span><span class="time">${formatTime(m.time)}</span></div>
+        <div class="text">${esc(m.text)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderFeed(){
+    const c=$('feedContainer');
+    const posts=DB.getPosts();
+    if(posts.length===0){ c.innerHTML='<div class="empty-msg">No posts yet.</div>'; return; }
+    const myId=myIdentity().id;
+
+    c.innerHTML=posts.map(p=>{
+      const likedBy=p.likes||[];
+      const isLiked=likedBy.indexOf(myId)!==-1;
+      const comments=p.comments||[];
+      const owner=isOwner(p);
+      const editing=editingPostId===p.id;
+
+      let media='';
+      if(p.media && p.mediaType==='image') media='<div class="post-media"><img src="'+p.media+'"></div>';
+      else if(p.media && p.mediaType==='video') media='<div class="post-media"><video controls src="'+p.media+'"></video></div>';
+
+      const commentsHtml=comments.length
+        ? comments.map((cm,ci)=>{
+            const co=cm.authorId===myId;
+            return `<div class="comment-item">
+              <div class="comment-body"><strong>${esc(cm.author)}</strong>${esc(cm.text)}</div>
+              ${co?'<div class="comment-owner-actions"><button class="comment-icon-btn delete" data-comment-delete="'+p.id+'|'+ci+'">🗑️</button></div>':''}
+            </div>`;
+          }).join('')
+        : '<div style="font-size:.72rem;color:var(--muted);padding:4px 10px;font-style:italic">No comments</div>';
+
+      const ownerActions = owner && !editing ? `
+        <div class="post-owner-actions">
+          <button class="icon-btn edit" data-post-edit="${p.id}">✏️</button>
+          <button class="icon-btn delete" data-post-delete="${p.id}">🗑️</button>
+        </div>` : '';
+
+      let editArea='';
+      if(editing){
+        editArea=`<div style="background:#eef2ff;border-radius:12px;padding:12px;margin-bottom:10px;border:1.5px dashed var(--brand-2)">
+          <div style="font-size:.7rem;font-weight:800;color:var(--brand-2);margin-bottom:6px">✏️ Editing</div>
+          <textarea id="editText-${p.id}">${esc(p.text||'')}</textarea>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <button class="btn btn-success btn-small" data-post-save="${p.id}">💾 Save</button>
+            <button class="btn btn-secondary btn-small" data-post-cancel="${p.id}">Cancel</button>
+            ${p.media?'<button class="btn btn-secondary btn-small" data-post-removemedia="'+p.id+'">🗑️ Media</button>':''}
+          </div>
+        </div>`;
+      }
+
+      return `<div class="feed-post" data-post-id="${p.id}">
+        <div class="post-header">
+          <div class="post-header-left">
+            <div class="avatar-mini">${p.authorPhoto?'<img src="'+p.authorPhoto+'">':'<span>👤</span>'}</div>
+            <div class="meta">
+              <strong>${esc(p.author)}</strong>
+              <small>${formatTime(p.time)} ${p.edited?'· edited':''}</small>
+            </div>
+          </div>
+          ${ownerActions}
+        </div>
+        ${editArea}
+        ${!editing && p.text ? '<div class="post-content">'+esc(p.text)+'</div>' : ''}
+        ${!editing ? media : ''}
+        <div class="post-actions">
+          <button class="like-btn ${isLiked?'liked':''}" data-action="like" data-id="${p.id}">
+            ${isLiked?'❤️':'🤍'} <span>${likedBy.length}</span>
+          </button>
+        </div>
+        <div class="comment-section">
+          <div class="comment-list">${commentsHtml}</div>
+          <div class="comment-input-row">
+            <input type="text" placeholder="Write a comment..." data-comment-input="${p.id}">
+            <button data-action="comment" data-id="${p.id}">Send</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderAll(){ renderMode(); renderCatalog(); renderFeed(); renderInbox(); renderAiChat(); }
+
+  // ---------- COPILOT AI ----------
+  const AI_KB = [
+    { k:['pointer','pointers'],
+      a:`A **pointer** stores a memory address.
+<pre>int x = 42;
+int *p = &x;
+cout &lt;&lt; *p;  // 42</pre>
+• \`&\` = address-of
+• \`*\` = dereference
+Use smart pointers (\`unique_ptr\`, \`shared_ptr\`) to avoid leaks.` },
+    { k:['oop','object oriented'],
+      a:`**OOP** = Object-Oriented Programming. Four pillars:
+1. **Encapsulation** — hide internals.
+2. **Inheritance** — reuse a parent class.
+3. **Polymorphism** — same name, different behavior.
+4. **Abstraction** — hide complexity.
+Used in C++, Java, C#, Python.` },
+    { k:['class'],
+      a:`A **class** is a blueprint for objects.
+<pre>class Dog {
+  String name;
+  Dog(String n){ name = n; }
+  void bark(){ System.out.println(name); }
+}</pre>` },
+    { k:['inheritance','extends','inherit'],
+      a:`**Inheritance** lets a child class reuse a parent's fields/methods.
+• Java: \`class Dog extends Animal\`
+• C++: \`class Dog : public Animal\`
+• C#: \`class Dog : Animal\`
+• Python: \`class Dog(Animal):\`` },
+    { k:['polymorphism','override','virtual'],
+      a:`**Polymorphism** — same method, different behavior.
+Overloading = compile-time. Overriding = runtime (needs \`virtual\`/\`override\`).` },
+    { k:['html','tags'],
+      a:`**HTML** structures web pages.
+<pre>&lt;h1&gt;Hello&lt;/h1&gt;
+&lt;p&gt;Paragraph&lt;/p&gt;
+&lt;a href="/"&gt;Link&lt;/a&gt;
+&lt;img src="pic.jpg"&gt;</pre>
+Use semantic tags: \`nav\`, \`header\`, \`main\`, \`footer\`.` },
+    { k:['css','flexbox','grid'],
+      a:`**CSS** styles HTML.
+• \`display:flex\` — 1D layout
+• \`display:grid\` — 2D layout
+• \`gap\` for spacing, \`margin\` outside, \`padding\` inside
+\`\`\`@media (max-width: 768px) { body { font-size: 14px } }\`\`\`` },
+    { k:['python','def','dict','list'],
+      a:`**Python** — friendly language.
+<pre>def greet(name):
+    return f"Hi {name}!"
+
+nums = [1, 2, 3]
+user = {"name": "Alex"}
+for n in nums: print(n)</pre>` },
+    { k:['java','jvm'],
+      a:`**Java** runs on JVM.
+<pre>public class Main {
+  public static void main(String[] args) {
+    System.out.println("Hi");
+  }
+}</pre>` },
+    { k:['c#','csharp','.net'],
+      a:`**C#** is Microsoft's .NET language.
+<pre>class Program {
+  static void Main() {
+    Console.WriteLine("Hi");
+  }
+}</pre>
+Uses \`var\`, LINQ, async/await.` },
+    { k:['web development','full-stack','api','http'],
+      a:`**Web development** = frontend + backend.
+• Frontend: HTML, CSS, JS (React, Vue)
+• Backend: Node, Python, Java, C#
+• APIs: REST, JSON
+• Deploy: Vercel, Netlify, AWS` },
+    { k:['quiz','pass','fail'],
+      a:`Each quiz has **10 questions**. Need **50% (5/10)** to pass. Retake unlimited.` },
+    { k:['compiler','run code'],
+      a:`The **Virtual Compiler** runs Python in your browser. Try:
+\`\`\`print("Hello!")
+for i in range(5): print(i)\`\`\`` },
+    { k:['payment','telebirr','visa','mpesa'],
+      a:`Payments: **Telebirr, Visa, Mastercard, PayPal, M-Pesa, CBE Birr**. Price: **ETB 250** one-time. Verify with transaction ID.` },
+    { k:['transaction','txn','verify'],
+      a:`Enter your **transaction ID** (6+ chars) from your SMS/email. Can't be reused. Amount must be ≥ 250 ETB.` },
+    { k:['career','roadmap','get a job'],
+      a:`**Developer roadmap:**
+1. Master ONE language (Python or JS).
+2. Build real projects.
+3. Learn Git + GitHub.
+4. Learn web basics (HTTP, JSON, REST).
+5. Databases (SQL + one NoSQL).
+6. A framework.
+7. Portfolio + LinkedIn + apply.
+**Timeline:** 6–12 months of consistency.` },
+    { k:['loop','for','while'],
+      a:`**Loops:**
+• \`for\` — known count
+• \`while\` — until condition
+• \`do-while\` — runs at least once
+\`\`\`for i in range(5): print(i)\`\`\`` },
+    { k:['function','method'],
+      a:`A **function** is a reusable block.
+• Python: \`def add(a,b): return a+b\`
+• Java/C#/C++: \`int add(int a, int b) { return a+b; }\`` },
+    { k:['array','list'],
+      a:`**Arrays** hold multiple values.
+• C++: \`int nums[3]={1,2,3};\`
+• Java: \`int[] nums = {1,2,3};\`
+• Python: \`nums = [1,2,3]\`` },
+    { k:['variable','var','declare'],
+      a:`**Variables** store values.
+• C++/Java/C#: \`int x = 5;\`
+• Python: \`x = 5\`
+• C#: \`var x = 5;\`` },
+    { k:['if','else','condition'],
+      a:`**Conditionals** make decisions.
+\`\`\`if (x > 0) { ... } else if (x == 0) { ... } else { ... }\`\`\`
+Python uses indentation, not braces.` },
+    { k:['hello world'],
+      a:`**Hello world:**
+• C++: \`cout &lt;&lt; "Hi";\`
+• Java: \`System.out.println("Hi");\`
+• Python: \`print("Hi")\`
+• HTML: \`&lt;h1&gt;Hi&lt;/h1&gt;\`` }
+  ];
+
+  function aiAnswer(q){
+    const ql=q.toLowerCase();
+    let best=null, bestScore=0;
+    for(const e of AI_KB){
+      const s=e.k.reduce((acc,k)=>acc+(ql.includes(k)?1:0),0);
+      if(s>bestScore){ best=e; bestScore=s; }
+    }
+    if(best) return best.a;
+    return `I don't have a specific answer. Try asking about:
+• **Concepts** — pointers, OOP, classes, inheritance
+• **Languages** — C++, Java, HTML, CSS, Python, C#
+• **Code** — loops, functions, variables, arrays, if-else
+• **Getting started** — hello world, roadmap, career
+• **Platform** — quizzes, payment, compiler, transaction ID`;
+  }
+
+  function renderMarkdownLite(text){
+    let s=esc(text);
+    s=s.replace(/```([\s\S]*?)```/g,(_,code)=>'<pre>'+code.trim()+'</pre>');
+    s=s.replace(/`([^`]+)`/g,'<code>$1</code>');
+    s=s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+    s=s.replace(/\n/g,'<br>');
+    return s;
+  }
+
+  function renderAiChat(){
+    const chat=$('aiChat');
+    const history=DB.getAiChat();
+    if(history.length===0){
+      chat.innerHTML=`<div class="ai-msg bot"><strong>Copilot:</strong> Hi 👋 I'm your OBSA tutor. Ask me anything about programming.<span class="msg-meta">just now</span></div>`;
+      return;
+    }
+    chat.innerHTML=history.map(m=>{
+      const time=formatTime(m.time);
+      if(m.role==='user') return `<div class="ai-msg user">${esc(m.text)}<span class="msg-meta">${time}</span></div>`;
+      return `<div class="ai-msg bot"><strong>Copilot:</strong> ${renderMarkdownLite(m.text)}<span class="msg-meta">${time}</span></div>`;
+    }).join('');
+    chat.scrollTop=chat.scrollHeight;
+  }
+
+  function sendAiMessage(text){
+    if(!text) return;
+    const history=DB.getAiChat();
+    history.push({role:'user', text, time:new Date().toISOString()});
+    DB.setAiChat(history);
+    renderAiChat();
+
+    const chat=$('aiChat');
+    const think=document.createElement('div');
+    think.className='ai-msg bot';
+    think.innerHTML='<strong>Copilot:</strong> <span class="spinner" style="width:14px;height:14px;border-width:2px"></span> thinking…';
+    chat.appendChild(think);
+    chat.scrollTop=chat.scrollHeight;
+
+    setTimeout(()=>{
+      const answer=aiAnswer(text);
+      const h=DB.getAiChat();
+      h.push({role:'bot', text:answer, time:new Date().toISOString()});
+      DB.setAiChat(h);
+      renderAiChat();
+    }, 500);
+  }
+
+  const ASK_CATEGORIES = {
+    concepts: `**Concepts Copilot can explain:**\n• Pointers, references, memory\n• OOP — encapsulation, inheritance, polymorphism\n• Classes, objects, constructors\n• Variables, data types, scope\n• Loops, conditionals, functions\n• Arrays, lists, collections`,
+    code: `**Code help examples:**\n• "Write a for loop in Python"\n• "Show me a class in Java"\n• "How do I declare an array in C#?"\n• "Give me a function example in C++"`,
+    languages: `**Languages covered:**\n• C++ — pointers, STL, OOP\n• Java — JVM, collections\n• HTML — semantic markup\n• CSS — Flexbox, Grid\n• Python — syntax, libraries\n• C# — .NET, LINQ\n• Web Dev — full-stack, APIs`,
+    quizzes: `**Quiz info:**\n• 10 questions per language\n• Need **50% (5/10)** to pass\n• Retake unlimited times\n• Complete languages in order\n• Tutorials cover all quiz topics`,
+    payment: `**Payment & account:**\n• Price: ETB 250 one-time\n• Methods: Telebirr, Visa, Mastercard, PayPal, M-Pesa, CBE Birr\n• Verify with transaction ID (6+ chars)\n• Same ID can't be reused`,
+    career: `**Career roadmap:**\n• Master one language deeply\n• Build real projects\n• Learn Git + GitHub\n• Learn web basics (HTTP, JSON, REST)\n• Databases (SQL + NoSQL)\n• A framework\n• Portfolio + apply`
+  };
+
+  function showAskCategory(cat){
+    const panel=$('askPanel');
+    panel.style.display='block';
+    panel.innerHTML=renderMarkdownLite(ASK_CATEGORIES[cat]||'');
+  }
+
+  // ---------- COMPILER ----------
+  function runPythonCode(){
+    const code=$('codeEditor').value;
+    const output=$('codeOutput');
+    output.textContent='';
+    output.classList.remove('error');
+
+    if(typeof Sk === 'undefined'){
+      output.textContent='❌ Python runtime not loaded. Check internet and reload.';
+      output.classList.add('error');
+      return;
+    }
+
+    Sk.configure({
+      output: function(text){ output.textContent += text; },
+      read: function(x){
+        if(Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+          throw "File not found: '"+x+"'";
+        return Sk.builtinFiles["files"][x];
+      },
+      __future__: Sk.python3
+    });
+
+    (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = 'codeOutput';
+
+    Sk.misceval.asyncToPromise(function(){
+      return Sk.importMainWithBody('<stdin>', false, code, true);
+    }).catch(function(err){
+      output.textContent += '\n❌ ' + err.toString();
+      output.classList.add('error');
+    });
+  }
+
+  // ---------- AUTH NAV ----------
+  $('gotoSignup').addEventListener('click',e=>{
+    e.preventDefault();
+    $('signinView').classList.add('hidden');
+    $('signupView').classList.remove('hidden');
+    $('paymentView').classList.add('hidden');
+    $('txnView').classList.add('hidden');
+    $('successView').classList.add('hidden');
+    $('stepBar').classList.remove('hidden');
+    setStep(1);
+  });
+  $('gotoSignin').addEventListener('click',e=>{
+    e.preventDefault();
+    $('signupView').classList.add('hidden');
+    $('paymentView').classList.add('hidden');
+    $('txnView').classList.add('hidden');
+    $('successView').classList.add('hidden');
+    $('signinView').classList.remove('hidden');
+    $('stepBar').classList.add('hidden');
+  });
+
+  function setStep(step){
+    document.querySelectorAll('.step').forEach(s=>{
+      const n=parseInt(s.dataset.step,10);
+      s.classList.remove('active','done');
+      if(n<step) s.classList.add('done');
+      if(n===step) s.classList.add('active');
+    });
+  }
+
+  // ---------- SIGN IN ----------
+  $('signinBtn').addEventListener('click',()=>{
+    const email=$('signinEmail').value.trim();
+    const pwd=$('signinPassword').value;
+    if(!email||!pwd){ showMsg($('signinMsg'),'Email and password required.'); return; }
+    const user=DB.findUser(email);
+    if(!user){ showMsg($('signinMsg'),'No account found. Please sign up.'); return; }
+    if(user.password!==pwd){ showMsg($('signinMsg'),'Wrong password.'); return; }
+    currentUser={id:user.id,name:user.name,email:user.email,bio:user.bio,photo:user.photo};
+    DB.setSession(currentUser);
+    DB.addInbox({id:uid(),from:'Sign-in',email:user.email,text:user.name+' signed in.',time:new Date().toISOString()});
+    showMsg($('signinMsg'),'Signed in!',false);
+    toast('Welcome back, '+user.name+'!','success');
+    $('signinPassword').value='';
+    renderAll();
+  });
+
+  // ---------- SIGNUP STEP 1 ----------
+  $('toPaymentBtn').addEventListener('click',()=>{
+    const name=$('signupName').value.trim();
+    const email=$('signupEmail').value.trim();
+    const pwd=$('signupPassword').value;
+    if(!name||!email||!pwd){ showMsg($('signupMsg'),'All fields required.'); return; }
+    if(!isStrongPassword(pwd)){ showMsg($('signupMsg'),'Password too weak.'); return; }
+    if(DB.findUser(email)){ showMsg($('signupMsg'),'Email already registered.'); return; }
+    pendingSignup={name,email,password:pwd};
+    showMsg($('signupMsg'),'Details OK.',false);
+    $('signupView').classList.add('hidden');
+    $('paymentView').classList.remove('hidden');
+    setStep(2);
+    resetPaymentUI();
+  });
+
+  // ---------- PAYMENT ----------
+  function resetPaymentUI(){
+    selectedPayMethod=null;
+    document.querySelectorAll('.pay-method').forEach(m=>m.classList.remove('selected'));
+    $('payDetailTitle').textContent='Select a method above';
+    $('payDetailFields').innerHTML='';
+    $('payNowBtn').disabled=true;
+  }
+  document.querySelectorAll('.pay-method').forEach(el=>{
+    el.addEventListener('click',()=>{
+      document.querySelectorAll('.pay-method').forEach(m=>m.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedPayMethod=el.dataset.method;
+      renderPayDetail(selectedPayMethod);
+      $('payNowBtn').disabled=false;
+      $('payNowBtn').textContent='Pay ETB 250 with '+labelOf(selectedPayMethod);
+    });
+  });
+  function labelOf(m){ return {telebirr:'Telebirr',visa:'Visa',mastercard:'Mastercard',paypal:'PayPal',mpesa:'M-Pesa',cbe:'CBE Birr'}[m]||m; }
+  function renderPayDetail(method){
+    $('payDetailTitle').textContent='Enter '+labelOf(method)+' details';
+    const f=$('payDetailFields');
+    if(method==='telebirr'){
+      f.innerHTML=`<div class="form-group"><label>Telebirr phone</label><input id="pdPhone" type="tel" placeholder="+251 9XX XXX XXX"></div>
+        <div class="form-group"><label>PIN (simulated)</label><input id="pdPin" type="password" maxlength="4" placeholder="••••"></div>`;
+    } else if(method==='visa'||method==='mastercard'){
+      f.innerHTML=`<div class="form-group"><label>Card number</label><input id="pdCard" type="text" maxlength="19" placeholder="4242 4242 4242 4242"></div>
+        <div class="row-2">
+          <div class="form-group"><label>Expiry</label><input id="pdExp" type="text" maxlength="5" placeholder="12/28"></div>
+          <div class="form-group"><label>CVC</label><input id="pdCvc" type="password" maxlength="4" placeholder="123"></div>
+        </div>
+        <div class="form-group"><label>Name on card</label><input id="pdName" type="text" placeholder="ALEX RIVERA"></div>`;
+    } else if(method==='paypal'){
+      f.innerHTML=`<div class="form-group"><label>PayPal email</label><input id="pdEmail" type="email"></div>
+        <div class="form-group"><label>Password</label><input id="pdPwd" type="password"></div>`;
+    } else if(method==='mpesa'){
+      f.innerHTML=`<div class="form-group"><label>M-Pesa phone</label><input id="pdPhone" type="tel" placeholder="+254 7XX XXX XXX"></div>
+        <div class="form-group"><label>PIN (simulated)</label><input id="pdPin" type="password" maxlength="4"></div>`;
+    } else if(method==='cbe'){
+      f.innerHTML=`<div class="form-group"><label>CBE Birr account</label><input id="pdAcct" type="text"></div>
+        <div class="form-group"><label>PIN (simulated)</label><input id="pdPin" type="password" maxlength="4"></div>`;
+    }
+  }
+  $('payNowBtn').addEventListener('click',()=>{
+    if(!pendingSignup){ showMsg($('paymentMsg'),'Session expired.'); return; }
+    if(!selectedPayMethod){ showMsg($('paymentMsg'),'Select a method.'); return; }
+    const msg=$('paymentMsg');
+    msg.className='message info';
+    msg.innerHTML='<span class="spinner"></span> Processing '+labelOf(selectedPayMethod)+'…';
+    $('payNowBtn').disabled=true;
+
+    setTimeout(()=>{
+      const ref=randomRef(selectedPayMethod);
+      const amount=250;
+      const now=new Date().toISOString();
+      pendingPayment={ref, amount, method:selectedPayMethod, now};
+      DB.addPayment({id:uid(), name:pendingSignup.name, email:pendingSignup.email, method:selectedPayMethod, methodLabel:labelOf(selectedPayMethod), amount, currency:'ETB', ref, status:'pending', time:now});
+      DB.addInbox({id:uid(),from:'Payment',email:pendingSignup.email,text:pendingSignup.name+' initiated ETB '+amount+' via '+labelOf(selectedPayMethod)+'. Ref: '+ref,time:now});
+      toast('Payment initiated.','success');
+      $('paymentView').classList.add('hidden');
+      $('txnView').classList.remove('hidden');
+      setStep(3);
+      $('txnMethodLabel').textContent='Awaiting via '+labelOf(selectedPayMethod)+' (Ref: '+ref+')';
+      $('txnIdInput').value='';
+      $('txnAmountInput').value=String(amount);
+      $('txnVerifyMsg').textContent='';
+      $('txnIdInput').focus();
+    }, 1200);
+  });
+  $('backToDetailsBtn').onclick=()=>{
+    $('paymentView').classList.add('hidden');
+    $('signupView').classList.remove('hidden');
+    setStep(1);
+  };
+  $('backToPaymentBtn').onclick=()=>{
+    $('txnView').classList.add('hidden');
+    $('paymentView').classList.remove('hidden');
+    setStep(2);
+  };
+
+  // ---------- TRANSACTION VERIFY ----------
+  $('verifyTxnBtn').addEventListener('click',()=>{
+    const txnId=$('txnIdInput').value.trim();
+    const amount=parseFloat($('txnAmountInput').value);
+    const msg=$('txnVerifyMsg');
+    if(!txnId || txnId.length < 6){ showMsg(msg,'Transaction ID must be 6+ chars.'); return; }
+    if(!amount || amount < 250){ showMsg(msg,'Amount must be ≥ 250.'); return; }
+    if(!pendingSignup || !pendingPayment){ showMsg(msg,'Session expired.'); return; }
+
+    msg.className='message info';
+    msg.innerHTML='<span class="spinner"></span> Verifying…';
+
+    setTimeout(()=>{
+      if(DB.findTxn(txnId)){ msg.className='message error'; msg.textContent='❌ Transaction ID already used.'; return; }
+
+      const now=new Date().toISOString();
+      DB.addTxn({id:uid(), txnId, amount, method:pendingPayment.method, ref:pendingPayment.ref, userEmail:pendingSignup.email, userName:pendingSignup.name, status:'verified', time:now});
+
+      const user={id:uid(), name:pendingSignup.name, email:pendingSignup.email, password:pendingSignup.password, bio:'', photo:'', paid:true, verified:true, txnId, paidAt:now};
+      DB.addUser(user);
+      DB.addInbox({id:uid(),from:'Transaction',email:user.email,text:'✅ '+user.name+' verified '+txnId+' for ETB '+amount+'.',time:now});
+      DB.addInbox({id:uid(),from:'Sign-up',email:user.email,text:user.name+' created & verified.',time:now});
+
+      currentUser={id:user.id,name:user.name,email:user.email,bio:user.bio,photo:user.photo};
+      DB.setSession(currentUser);
+
+      $('txnView').classList.add('hidden');
+      $('successView').classList.remove('hidden');
+      setStep(4);
+      $('successReceipt').innerHTML='Transaction ID: <strong>'+esc(txnId)+'</strong><br>Ref: <strong>'+esc(pendingPayment.ref)+'</strong><br>Paid via '+labelOf(pendingPayment.method)+' · ETB '+amount.toFixed(2);
+
+      $('signupName').value=''; $('signupEmail').value=''; $('signupPassword').value='';
+      pendingSignup=null; pendingPayment=null;
+      toast('✅ Account activated!','success');
+      renderAll();
+    }, 1300);
+  });
+
+  $('enterAppBtn').onclick=()=>{
+    $('successView').classList.add('hidden');
+    $('stepBar').classList.add('hidden');
+    renderAll();
+  };
+
+  // ---------- LOGOUT ----------
+  $('logoutBtn').addEventListener('click',()=>{
+    currentUser=null;
+    DB.clearSession();
+    quizState=null; editingPostId=null;
+    $('viewerArea').innerHTML='';
+    toast('Logged out.','warning');
+    renderAll();
+  });
+
+  // ---------- PROFILE ----------
+  $('profilePhotoInput').addEventListener('change',e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      if(currentUser){
+        currentUser.photo=ev.target.result;
+        const users=DB.getUsers();
+        const i=users.findIndex(u=>u.id===currentUser.id);
+        if(i!==-1){ users[i].photo=currentUser.photo; DB.saveUsers(users); }
+        DB.setSession(currentUser);
+      } else {
+        const g=DB.getGuest(); g.photo=ev.target.result; DB.setGuest(g);
+      }
+      renderMode();
+      toast('Photo updated!','success');
+    };
+    r.readAsDataURL(f);
+  });
+  $('saveProfileBtn').addEventListener('click',()=>{
+    const bio=$('profileBio').value.trim();
+    if(currentUser){
+      currentUser.bio=bio;
+      const users=DB.getUsers();
+      const i=users.findIndex(u=>u.id===currentUser.id);
+      if(i!==-1){ users[i].bio=bio; DB.saveUsers(users); }
+      DB.setSession(currentUser);
+      showMsg($('profileMsg'),'Profile saved!',false);
+    } else {
+      const g=DB.getGuest(); g.bio=bio; DB.setGuest(g);
+      showMsg($('profileMsg'),'Guest profile saved!',false);
+    }
+  });
+
+  // ---------- SETTINGS ----------
+  document.querySelectorAll('.settings-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('.settings-tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.settings-panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      $('panel-'+tab.dataset.tab).classList.add('active');
+    });
+  });
+  $('saveDeviceBtn').onclick=()=>{ DB.setDevice({theme:$('themeSelect').value,notif:$('notifSelect').value}); showMsg($('deviceMsg'),'Saved!',false); };
+  $('savePaymentBtn').onclick=()=>{ DB.setPayment({method:$('paymentSelect').value,phone:$('telebirrPhone').value}); showMsg($('paymentMsg2'),'Saved!',false); };
+
+  // ---------- CATALOG CLICKS ----------
+  $('catalogList').addEventListener('click',e=>{
+    const v=e.target.closest('button[data-view]');
+    const q=e.target.closest('button[data-quiz]');
+    if(v){ openViewer(v.dataset.view); $('viewerArea').scrollIntoView({behavior:'smooth',block:'center'}); }
+    if(q){ openQuiz(q.dataset.quiz); $('viewerArea').scrollIntoView({behavior:'smooth',block:'center'}); }
+  });
+
+  // ---------- COMPOSER ----------
+  document.querySelectorAll('.composer-tab').forEach(t=>{
+    t.addEventListener('click',()=>{
+      document.querySelectorAll('.composer-tab').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      activeComposerType=t.dataset.type;
+      pendingMedia=null; pendingMediaType=null;
+      $('composerPreview').classList.add('hidden');
+      $('composerPreview').innerHTML='';
+      if(activeComposerType==='text'){
+        $('mediaInputArea').classList.add('hidden');
+      } else {
+        $('mediaInputArea').classList.remove('hidden');
+        $('postMediaInput').accept=activeComposerType==='image'?'image/*':'video/*';
+        $('mediaLabel').textContent=activeComposerType==='image'?'Choose image':'Choose video';
+      }
+    });
+  });
+  $('postMediaInput').addEventListener('change',e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      pendingMedia=ev.target.result;
+      pendingMediaType=activeComposerType;
+      const p=$('composerPreview');
+      p.classList.remove('hidden');
+      p.innerHTML=activeComposerType==='image'?'<img src="'+pendingMedia+'">':'<video controls src="'+pendingMedia+'"></video>';
+    };
+    r.readAsDataURL(f);
+  });
+  $('createPostBtn').addEventListener('click',()=>{
+    const text=$('postText').value.trim();
+    if(!text && !pendingMedia){ showMsg($('postMsg'),'Write something or attach media.'); return; }
+    const me=myIdentity();
+    DB.addPost({id:uid(), authorId:me.id, author:me.name, authorPhoto:me.photo, text, media:pendingMedia, mediaType:pendingMediaType, time:new Date().toISOString(), edited:false, likes:[], comments:[]});
+    $('postText').value=''; pendingMedia=null; pendingMediaType=null;
+    $('composerPreview').classList.add('hidden'); $('composerPreview').innerHTML='';
+    $('postMediaInput').value='';
+    showMsg($('postMsg'),'Published!',false);
+    toast('Post published!','success');
+    renderFeed();
+  });
+
+  // ---------- FEED INTERACTIONS ----------
+  $('feedContainer').addEventListener('click',e=>{
+    const like=e.target.closest('button[data-action="like"]');
+    if(like){
+      const id=like.dataset.id;
+      const posts=DB.getPosts();
+      const p=posts.find(x=>x.id===id);
+      if(!p) return;
+      const myId=myIdentity().id;
+      const likes=p.likes||[];
+      const i=likes.indexOf(myId);
+      if(i===-1){ likes.push(myId); toast('❤️','success'); }
+      else { likes.splice(i,1); toast('Unliked','warning'); }
+      DB.updatePost(id,{likes});
+      renderFeed(); return;
+    }
+    const cmt=e.target.closest('button[data-action="comment"]');
+    if(cmt){
+      const id=cmt.dataset.id;
+      const input=document.querySelector('input[data-comment-input="'+id+'"]');
+      const text=input.value.trim();
+      if(!text) return;
+      const me=myIdentity();
+      const posts=DB.getPosts();
+      const p=posts.find(x=>x.id===id);
+      if(!p) return;
+      const comments=p.comments||[];
+      comments.push({authorId:me.id, author:me.name, text, time:new Date().toISOString()});
+      DB.updatePost(id,{comments});
+      input.value='';
+      toast('Comment added!','success');
+      renderFeed(); return;
+    }
+    const dc=e.target.closest('button[data-comment-delete]');
+    if(dc){
+      const [id, idxStr]=dc.dataset.commentDelete.split('|');
+      const idx=parseInt(idxStr,10);
+      const me=myIdentity();
+      const posts=DB.getPosts();
+      const p=posts.find(x=>x.id===id);
+      if(!p) return;
+      const comments=p.comments||[];
+      const cm=comments[idx];
+      if(!cm || cm.authorId!==me.id) return;
+      if(!confirm('Delete this comment?')) return;
+      comments.splice(idx,1);
+      DB.updatePost(id,{comments});
+      renderFeed(); return;
+    }
+    const ed=e.target.closest('button[data-post-edit]');
+    if(ed){
+      const id=ed.dataset.postEdit;
+      const posts=DB.getPosts();
+      const p=posts.find(x=>x.id===id);
+      if(!p || !isOwner(p)) return;
+      editingPostId=id;
+      renderFeed(); return;
+    }
+    const dl=e.target.closest('button[data-post-delete]');
+    if(dl){
+      const id=dl.dataset.postDelete;
+      const posts=DB.getPosts();
+      const p=posts.find(x=>x.id===id);
+      if(!p || !isOwner(p)) return;
+      if(!confirm('Delete post?')) return;
+      DB.deletePost(id);
+      toast('Deleted.','warning');
+      renderFeed(); return;
+    }
+    const sv=e.target.closest('button[data-post-save]');
+    if(sv){
+      const id=sv.dataset.postSave;
+      const posts=DB.getPosts();
+      const p=posts.find(x=>x.id===id);
+      if(!p) return;
+      const txt=document.getElementById('editText-'+id).value.trim();
+      if(!txt && !p.media) return;
+      DB.updatePost(id,{text:txt, edited:true, editedAt:new Date().toISOString()});
+      editingPostId=null;
+      toast('Updated!','success');
+      renderFeed(); return;
+    }
+    const cn=e.target.closest('button[data-post-cancel]');
+    if(cn){ editingPostId=null; renderFeed(); return; }
+    const rm=e.target.closest('button[data-post-removemedia]');
+    if(rm){
+      const id=rm.dataset.postRemovemedia;
+      DB.updatePost(id,{media:'', mediaType:null, edited:true, editedAt:new Date().toISOString()});
+      toast('Media removed.','warning');
+      renderFeed(); return;
+    }
+  });
+  $('feedContainer').addEventListener('keydown',e=>{
+    if(e.key==='Enter' && e.target.matches('input[data-comment-input]')){
+      e.preventDefault();
+      const id=e.target.dataset.commentInput;
+      document.querySelector('button[data-action="comment"][data-id="'+id+'"]').click();
+    }
+  });
+
+  // ---------- COPILOT EVENTS ----------
+  $('aiSendBtn').addEventListener('click',()=>{
+    const input=$('aiInput');
+    const text=input.value.trim();
+    if(!text) return;
+    sendAiMessage(text);
+    input.value='';
+  });
+  $('aiInput').addEventListener('keydown',e=>{
+    if(e.key==='Enter'){ e.preventDefault(); $('aiSendBtn').click(); }
+  });
+  document.querySelectorAll('.ai-suggest').forEach(b=>{
+    b.addEventListener('click',()=>{ $('aiInput').value=b.textContent; $('aiSendBtn').click(); });
+  });
+  document.querySelectorAll('.ask-cat').forEach(b=>{
+    b.addEventListener('click',()=>showAskCategory(b.dataset.cat));
+  });
+
+  // ---------- COMPILER EVENTS ----------
+  $('runCodeBtn').onclick=runPythonCode;
+  $('clearOutputBtn').onclick=()=>{ $('codeOutput').textContent='— output will appear here —'; $('codeOutput').classList.remove('error'); };
+  $('resetCodeBtn').onclick=()=>{
+    $('codeEditor').value=`# OBSA ACADEMY — Python Playground
+def greet(name):
+    return f"Hello, {name}!"
+
+print(greet("OBSA Academy"))
+
+for i in range(1, 6):
+    print(i, "squared =", i ** 2)
+`;
+    $('codeOutput').textContent='— output will appear here —';
+  };
+
+  // ---------- INIT ----------
+  renderAll();
+})();
+</script>
+</body>
+</html>
